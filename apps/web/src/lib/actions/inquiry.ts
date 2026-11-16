@@ -19,7 +19,19 @@ const inquirySchema = z.object({
   /** Page the form was sent from, and the ad or link that brought the visitor */
   page: z.string().max(300).optional(),
   attribution: z.record(z.string().max(300)).optional(),
+  /** Spam guards: a field people never see, and when the form was opened (ms) */
+  website: z.string().max(200).optional(),
+  startedAt: z.number().optional(),
 });
+
+// A form sent this soon after it opened was not typed by a person
+const MIN_FILL_MS = 2500;
+
+/** 7 to 15 digits and not one digit repeated */
+function plausiblePhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 15 && !/^(\d)\1+$/.test(digits);
+}
 
 export type InquiryFormData = z.infer<typeof inquirySchema>;
 
@@ -32,7 +44,15 @@ export async function submitInquiry(data: InquiryFormData) {
     };
   }
 
-  const { page, attribution, ...inquiry } = parsed.data;
+  const { page, attribution, website, startedAt, ...inquiry } = parsed.data;
+
+  // Bots get the same answer as people, and nothing is saved
+  if (website || (startedAt !== undefined && Date.now() - startedAt < MIN_FILL_MS)) {
+    return { success: true, message: "Your inquiry has been submitted successfully." };
+  }
+  if (inquiry.phone && !plausiblePhone(inquiry.phone)) {
+    return { success: false, error: "Please enter a valid mobile number, with country code if outside the UAE." };
+  }
   try {
     const savedInquiry = await prisma.inquiry.create({
       data: {

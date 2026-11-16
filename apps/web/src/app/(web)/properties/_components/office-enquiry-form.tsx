@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,17 +18,41 @@ const schema = z.object({
     .trim()
     .refine((v) => {
       const digits = v.replace(/\D/g, "");
-      return digits.length >= 7 && digits.length <= 15;
+      return digits.length >= 7 && digits.length <= 15 && !/^(\d)\1+$/.test(digits);
     }, "Enter your mobile number, with country code if outside the UAE"),
+  // Hidden from people; only bots fill it in
+  website: z.string().optional(),
 });
+
+type Scope = "office" | "residential" | "general";
+
+const COPY: Record<Scope, { heading: string; sale: string; lease: string }> = {
+  office: {
+    heading: "Get the office shortlist",
+    sale: "I'm looking for an office to buy in Dubai. Please send me the available options and prices.",
+    lease: "I'm looking for an office to lease in Dubai. Please send me the available options.",
+  },
+  residential: {
+    heading: "Get the home shortlist",
+    sale: "I'm looking for a home in Dubai. Please send me the available options and prices.",
+    lease: "I'm looking for a home to rent in Dubai. Please send me the available options.",
+  },
+  general: {
+    heading: "Tell us what you need",
+    sale: "I'm looking for a property in Dubai. Please call me to discuss the available options.",
+    lease: "I'm looking for a property to lease in Dubai. Please call me to discuss the available options.",
+  },
+};
 
 type FormData = z.infer<typeof schema>;
 
 const inputCls =
   "w-full h-11 rounded-none !border-0 !border-b !border-lx-line !bg-transparent px-0 text-[14px] text-lx-text placeholder:text-lx-muted focus:!border-lx-gold focus:outline-none focus:ring-0 transition-colors";
 
-/** Short enquiry card at the top of the commercial listings, so ad visitors can ask without scrolling */
-export function OfficeEnquiryForm({ lease = false }: { lease?: boolean }) {
+/** Short enquiry card at the top of the listings and the home page, so visitors can ask without scrolling */
+export function OfficeEnquiryForm({ lease = false, scope = "office" }: { lease?: boolean; scope?: Scope }) {
+  const startedAt = useRef(Date.now());
+  const copy = COPY[scope];
   const {
     register,
     handleSubmit,
@@ -36,18 +61,16 @@ export function OfficeEnquiryForm({ lease = false }: { lease?: boolean }) {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit(data: FormData) {
-    const message = lease
-      ? "I'm looking for an office to lease in Dubai. Please send me the available options."
-      : "I'm looking for an office to buy in Dubai. Please send me the available options and prices.";
     const result = await submitInquiry({
       ...data,
-      message,
+      message: lease ? copy.lease : copy.sale,
+      startedAt: startedAt.current,
       type: "general",
       page: window.location.pathname + window.location.search,
       attribution: getAttribution(),
     });
     if (result.success) {
-      trackLead("office_enquiry", { listing_type: lease ? "lease" : "sale" });
+      trackLead("office_enquiry", { listing_type: lease ? "lease" : "sale", scope });
       toast.success("Thank you. An advisor will call you shortly.");
       reset();
     } else {
@@ -59,9 +82,10 @@ export function OfficeEnquiryForm({ lease = false }: { lease?: boolean }) {
     <div className="rounded-[4px] border border-lx-line bg-lx-surface p-6">
       <p className="lx-eyebrow mb-3">Enquire</p>
       <h2 className="mb-5 font-display text-[22px] font-normal leading-tight text-lx-text">
-        Get the office shortlist
+        {copy.heading}
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <input {...register("website")} type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
         <div className="grid grid-cols-2 gap-5">
           <div>
             <input {...register("firstName")} placeholder="First name" aria-label="First name" autoComplete="given-name" className={inputCls} />
