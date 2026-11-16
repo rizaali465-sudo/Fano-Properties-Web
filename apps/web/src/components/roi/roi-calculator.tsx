@@ -24,7 +24,12 @@ export function RoiCalculator({
   propertyId,
   propertyTitle,
 }: RoiCalculatorProps) {
-  const [inputs, setInputs] = useState<RoiInputs>(() => defaultRoiInputs(price, sizeSqft));
+  // On a listing the estimate opens on a cash purchase: a full mortgage at today's rates
+  // shows a monthly loss before the visitor has changed anything
+  const [inputs, setInputs] = useState<RoiInputs>(() => ({
+    ...defaultRoiInputs(price, sizeSqft),
+    ...(variant === "compact" ? { useMortgage: false } : {}),
+  }));
   const [showAdvanced, setShowAdvanced] = useState(variant === "full");
   const result = useMemo(() => calculateRoi(inputs), [inputs]);
 

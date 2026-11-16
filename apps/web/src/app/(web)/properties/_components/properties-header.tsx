@@ -44,7 +44,7 @@ export function PropertiesHeader({ category = "all", listingType }: PropertiesHe
 
   return (
     <div className="border-b border-lx-line bg-lx-page pb-14 pt-16 lg:pb-20 lg:pt-24">
-      <div className={isCommercial ? "container-site grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start lg:gap-16" : "container-site"}>
+      <div className="container-site grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start lg:gap-16">
         <div>
           <p className="lx-eyebrow mb-6">{copy.eyebrow}</p>
           <h1 className="font-display text-[clamp(36px,4.6vw,56px)] font-normal leading-[1.02] tracking-[-0.01em] text-lx-text text-balance">
@@ -52,25 +52,26 @@ export function PropertiesHeader({ category = "all", listingType }: PropertiesHe
           </h1>
           <p className="mt-6 max-w-xl text-[15px] leading-[1.8] text-lx-text/70">{copy.body}</p>
 
-          {isCommercial && (
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="tel:+97145644635" className="btn-gold inline-flex items-center gap-2">
-                <Phone className="h-4 w-4" aria-hidden="true" />
-                Call +971 4 564 4635
-              </a>
-              <a
-                href="https://wa.me/971525719164"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-gold-outline inline-flex items-center gap-2"
-              >
-                WhatsApp +971 52 571 9164
-              </a>
-            </div>
-          )}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="tel:+97145644635" className="btn-gold inline-flex items-center gap-2">
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              Call +971 4 564 4635
+            </a>
+            <a
+              href="https://wa.me/971525719164"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-gold-outline inline-flex items-center gap-2"
+            >
+              WhatsApp +971 52 571 9164
+            </a>
+          </div>
         </div>
 
-        {isCommercial && <OfficeEnquiryForm lease={lease} />}
+        <OfficeEnquiryForm
+          lease={lease || listingType === "rent"}
+          scope={isCommercial ? "office" : category === "residential" ? "residential" : "general"}
+        />
       </div>
     </div>
   );
