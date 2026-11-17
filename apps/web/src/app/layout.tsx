@@ -1,30 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Montserrat, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/shared/query-provider";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: "../../public/fonts/inter-latin-variable.woff2",
   variable: "--font-inter",
   display: "swap",
+  weight: "100 900",
 });
 
-// The tagline uses Source Serif italic, as in the Fano team app
-const sourceSerif = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["italic"],
+// Display serif for headings and pull quotes: Playfair Display, medium weight
+// with a lighter italic for the second line
+const playfair = localFont({
+  src: [
+    { path: "../../public/fonts/playfair-display-latin-normal.woff2", weight: "400 700", style: "normal" },
+    { path: "../../public/fonts/playfair-display-latin-italic.woff2", weight: "400 700", style: "italic" },
+  ],
   variable: "--font-serif",
   display: "swap",
 });
 
-// Headings use Montserrat, as in the Fano team app
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+// Montserrat stays for the logo wordmark and small tracked labels
+const montserrat = localFont({
+  src: "../../public/fonts/montserrat-latin-variable.woff2",
   variable: "--font-montserrat",
   display: "swap",
+  weight: "100 900",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanoproperties.com";
@@ -47,14 +51,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: SITE_URL,
     siteName: "Fano Properties",
     title: "Fano Properties — Luxury Real Estate in Dubai",
     description:
       "Discover luxury properties for sale and rent in Dubai. Premium real estate, exceptional service.",
     images: [
       {
-        url: "/opengraph-image",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
         alt: "Fano Properties — Luxury Real Estate in Dubai",
@@ -65,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Fano Properties — Luxury Real Estate in Dubai",
     description: "Discover luxury properties for sale and rent in Dubai.",
-    images: ["/opengraph-image"],
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,
@@ -81,7 +84,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#E6DFD5",
+  themeColor: "#0B1220",
   width: "device-width",
   initialScale: 1,
 };
@@ -92,8 +95,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${montserrat.variable} ${sourceSerif.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-sand text-black antialiased">
+    <html lang="en" className={`${inter.variable} ${montserrat.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-surface text-black antialiased">
         <QueryProvider>
           {children}
           <Toaster position="bottom-right" richColors />

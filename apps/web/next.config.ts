@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   transpilePackages: ["@fano/ui", "@fano/utils", "@fano/types"],
   images: {
+    qualities: [75, 85, 90],
     remotePatterns: [
       {
         protocol: "https",
@@ -31,6 +32,10 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
+  // Browsers and crawlers ask for /favicon.ico directly; serve the generated app icon there
+  async rewrites() {
+    return [{ source: "/favicon.ico", destination: "/icon" }];
   },
 };
 

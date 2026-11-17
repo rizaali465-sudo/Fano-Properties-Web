@@ -6,12 +6,18 @@ import { CACHE_TAGS } from "@/lib/cache";
 import { z } from "zod";
 import { generateSlug } from "@fano/utils";
 import { requireAdmin } from "@/lib/admin-auth";
+import { actionFailed } from "@/lib/admin-errors";
 
 const articleSchema = z.object({
   title: z.string().min(1),
   excerpt: z.string().min(1),
   content: z.string().min(1),
-  coverImage: z.string().url().optional().or(z.literal("")),
+  // Uploaded covers are site-relative /media/… paths; pasted ones are absolute URLs
+  coverImage: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || v.startsWith("/") || /^https?:\/\/\S+$/i.test(v))
+    .optional(),
   published: z.boolean().default(false),
   readTime: z.number({ coerce: true }).int().optional(),
   categoryId: z.string().optional(),
@@ -38,8 +44,8 @@ export async function createArticle(data: z.infer<typeof articleSchema>) {
     revalidatePath("/admin/blog");
     revalidateTag(CACHE_TAGS.blog);
     return { success: true, id: article.id };
-  } catch {
-    return { success: false, error: "Failed to create article." };
+  } catch (e) {
+    return actionFailed("Failed to create article.", e);
   }
 }
 
@@ -55,8 +61,8 @@ export async function updateArticle(id: string, data: Partial<z.infer<typeof art
     revalidatePath("/admin/blog");
     revalidateTag(CACHE_TAGS.blog);
     return { success: true };
-  } catch {
-    return { success: false, error: "Failed to update article." };
+  } catch (e) {
+    return actionFailed("Failed to update article.", e);
   }
 }
 
@@ -67,8 +73,8 @@ export async function deleteArticle(id: string) {
     revalidatePath("/admin/blog");
     revalidateTag(CACHE_TAGS.blog);
     return { success: true };
-  } catch {
-    return { success: false, error: "Failed to delete article." };
+  } catch (e) {
+    return actionFailed("Failed to delete article.", e);
   }
 }
 
@@ -82,7 +88,7 @@ export async function toggleArticlePublished(id: string, published: boolean) {
     revalidatePath("/admin/blog");
     revalidateTag(CACHE_TAGS.blog);
     return { success: true };
-  } catch {
-    return { success: false, error: "Failed to update." };
+  } catch (e) {
+    return actionFailed("Failed to update.", e);
   }
 }

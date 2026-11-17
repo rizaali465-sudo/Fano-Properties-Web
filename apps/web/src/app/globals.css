@@ -10,17 +10,18 @@
     --gold-light:      35 65% 89%;   /* #F6E7D2 */
     --gold-bg:         30 28% 94%;   /* #F4EFEA */
 
-    --background: 34 24% 87%;        /* #E6DFD5 Calcite Sand */
+    /* Warm Bone is the page itself (airy, like a white site); Calcite Sand is the alternate band */
+    --background: 30 28% 94%;        /* #F4EFEA Warm Bone */
     --foreground: 26 15% 15%;        /* #2B2520 Espresso */
-    --card: 30 28% 94%;              /* #F4EFEA Warm Bone */
+    --card: 30 33% 97%;              /* #FBF8F4 Linen */
     --card-foreground: 26 15% 15%;
-    --popover: 30 28% 94%;
+    --popover: 30 33% 97%;
     --popover-foreground: 26 15% 15%;
     --primary: 26 15% 15%;
     --primary-foreground: 30 28% 94%;
-    --secondary: 33 22% 88%;
+    --secondary: 34 24% 87%;         /* #E6DFD5 Calcite Sand */
     --secondary-foreground: 26 15% 15%;
-    --muted: 33 22% 88%;
+    --muted: 34 24% 87%;
     --muted-foreground: 30 11% 43%;  /* #7A6E62 */
     --accent: 35 65% 89%;
     --accent-foreground: 26 15% 15%;
@@ -47,7 +48,7 @@
 
   body {
     @apply text-black;
-    background: radial-gradient(1200px 700px at 85% -10%, #F4EFEA, transparent 60%), #E6DFD5;
+    background: #F4EFEA;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
   }
 
@@ -56,10 +57,14 @@
     color: #2B2520;
   }
 
+  /* Headings: Playfair Display, with a lighter italic for the emotional second line */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
+    font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  h1 em, h2 em, h3 em, h1 .italic, h2 .italic, h3 .italic { font-weight: 400; }
 
   img, video {
     @apply max-w-full;
@@ -91,21 +96,89 @@
 }
 
 @layer components {
-  /* Page title band: soft bone light fading into the sand page, with a warm hairline */
+  /* Page title band: the bone page with a single warm hairline beneath */
   .page-band {
     position: relative;
-    background:
-      radial-gradient(900px 260px at 15% 0%, rgba(246, 231, 210, 0.75), transparent 70%),
-      linear-gradient(to bottom, rgba(244, 239, 234, 0.85), rgba(244, 239, 234, 0.25));
-    border-bottom: 1px solid rgba(197, 186, 171, 0.55);
+    background: #F4EFEA;
+    border-bottom: 1px solid rgba(197, 186, 171, 0.45);
   }
 
-  /* Alternate section tint: a lighter sand band so sections read apart on the sand page */
+  /* Alternate band: Calcite Sand, so sections read apart without borders */
   .section-tint {
-    background: linear-gradient(to bottom, rgba(244, 239, 234, 0.55), rgba(244, 239, 234, 0.2));
-    border-top: 1px solid rgba(197, 186, 171, 0.35);
-    border-bottom: 1px solid rgba(197, 186, 171, 0.35);
+    background: #E6DFD5;
   }
+
+  /* Primary button: glossy solid gold pill (fully round ends), a bronze
+     hairline and a firm press. */
+  .btn-gold {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 26px;
+    border-radius: 999px;
+    border: 1px solid #B07C3A;
+    /* gloss: bright upper half, crisp break at the middle, deeper gold below */
+    background:
+      linear-gradient(180deg,
+        #F7D597 0%, #EEC076 46%,
+        #DFA458 52%, #D8984C 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .6),
+      inset 0 -1px 0 rgba(120, 78, 30, .25),
+      0 2px 4px rgba(43, 37, 32, .14),
+      0 1px 0 rgba(255, 255, 255, .35);
+    color: #1A1A1A;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: background .2s, transform .2s, box-shadow .2s, border-color .2s;
+  }
+  .btn-gold:hover {
+    background:
+      linear-gradient(180deg,
+        #FBDEA6 0%, #F2C882 46%,
+        #E4AB5F 52%, #DC9E52 100%);
+    border-color: #A06E30;
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .65),
+      inset 0 -1px 0 rgba(120, 78, 30, .25),
+      0 10px 20px -10px rgba(140, 106, 71, .7),
+      0 2px 4px rgba(43, 37, 32, .12);
+  }
+  .btn-gold:active {
+    transform: translateY(0);
+    background: linear-gradient(180deg, #D8984C 0%, #E3AA5F 100%);
+    box-shadow: inset 0 2px 5px rgba(43, 37, 32, .25);
+    text-shadow: none;
+  }
+  .btn-gold:disabled { transform: none; box-shadow: none; text-shadow: none; }
+
+  /* Secondary: the same pill shape with a gold hairline, filling gold on hover */
+  .btn-gold-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 26px;
+    border-radius: 999px;
+    border: 1px solid #C99A5B;
+    color: #2B2520;
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: border-color .2s, background .2s, color .2s;
+  }
+  .btn-gold-outline:hover { border-color: #B98540; background: #E2A862; }
 }
 
 @layer utilities {
@@ -121,49 +194,170 @@
     @apply py-8 lg:py-14;
   }
 
-  .heading-display {
-    @apply font-semibold tracking-[-0.02em] leading-[1.1] text-balance;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#8a6e4a] to-[#E2A862];
-  }
-
-  .card-hover {
-    @apply transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-2xl;
-  }
-
   .animate-delay-100 { animation-delay: 100ms; }
   .animate-delay-200 { animation-delay: 200ms; }
   .animate-delay-300 { animation-delay: 300ms; }
   .animate-delay-400 { animation-delay: 400ms; }
 }
 
-/* ─── Admin theme override ───────────────────────────────────── */
+/* ─── Public site: navy with champagne gold, one set of tokens ───── */
+/* RGB channels so Tailwind opacity modifiers (bg-lx-page/60) work; on :root so portals get them too */
+:root {
+  --lx-page-rgb: 11 18 32;        /* #0B1220 */
+  --lx-surface-rgb: 18 26 43;     /* #121A2B */
+  --lx-raised-rgb: 27 36 56;      /* #1B2438 */
+  --lx-text-rgb: 244 239 234;     /* #F4EFEA */
+  --lx-muted-rgb: 163 152 134;    /* #A39886 */
+}
+.lx-root {
+  --lx-page: rgb(var(--lx-page-rgb));
+  --lx-surface: rgb(var(--lx-surface-rgb));
+  --lx-raised: rgb(var(--lx-raised-rgb));
+  --lx-text: rgb(var(--lx-text-rgb));
+  --lx-muted: rgb(var(--lx-muted-rgb));
+  --lx-line: rgba(226, 168, 98, 0.22);
+  background: var(--lx-page);
+  color: var(--lx-text);
+  min-height: 100vh;
+}
+/* The page colour reaches the viewport edges and overscroll too */
+html:has(> body > .lx-root), html:has(.lx-root) body { background: #0B1220; }
+.lx-root ::selection { background: #E2A862; color: #0B1220; }
+
+/* Secondary button on dark: bone text until the gold fill arrives */
+.lx-root .btn-gold-outline { color: #F4EFEA; border-color: rgba(226, 168, 98, 0.55); }
+.lx-root .btn-gold-outline:hover { color: #0B1220; }
+.lx-root .page-band { background: var(--lx-page); border-bottom-color: var(--lx-line); }
+.lx-root .section-tint { background: var(--lx-surface); }
+
+/* Form fields on dark: a raised navy box with a gold hairline */
+.lx-root input:where(:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"])),
+.lx-root textarea,
+.lx-root select {
+  background-color: var(--lx-surface);
+  border-color: var(--lx-line);
+  color: var(--lx-text);
+  box-shadow: none;
+  color-scheme: dark;
+}
+.lx-root input::placeholder, .lx-root textarea::placeholder { color: rgb(var(--lx-muted-rgb)); }
+.lx-root select option { background: #121A2B; color: #F4EFEA; }
+.lx-root input[type="checkbox"], .lx-root input[type="radio"] { accent-color: #E2A862; }
+
+/* Small tracked label with a short gold rule, on dark */
+.lx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #E2A862;
+}
+.lx-eyebrow::before { content: ""; width: 32px; height: 1px; background: #E2A862; flex: none; }
+
+/* Section numeral: "01" in gold with a short rule */
+.lx-numeral {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #E2A862;
+}
+.lx-numeral::after { content: ""; width: 24px; height: 1px; background: rgba(226, 168, 98, 0.5); }
+
+/* Text link with a gold rule that grows on hover: the only call to action on dark */
+.lx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F4EFEA;
+  transition: color 0.3s;
+}
+.lx-link::after { content: ""; width: 36px; height: 1px; background: #E2A862; transition: width 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.lx-link:hover { color: #E2A862; }
+.lx-link:hover::after { width: 64px; }
+.lx-link-quiet { color: rgba(244, 239, 234, 0.6); }
+.lx-link-quiet::after { background: rgba(226, 168, 98, 0.5); }
+
+/* Secondary action: tracked capitals with a hairline underneath */
+.lx-underline {
+  display: inline-block;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #FFFFFF;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  transition: color .3s, border-color .3s;
+}
+.lx-underline:hover { color: #E2A862; border-color: #E2A862; }
+
+/* Hairline where a border used to be */
+.lx-hairline { border-color: var(--lx-line); }
+
+/* Entrance: a quiet rise, once */
+.lx-rise { animation: lx-rise 1.1s cubic-bezier(0.2, 0.65, 0.25, 1) both; }
+.lx-rise-1 { animation-delay: 0.15s; }
+.lx-rise-2 { animation-delay: 0.3s; }
+.lx-rise-3 { animation-delay: 0.45s; }
+@keyframes lx-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Scroll cue: a thin line that breathes */
+.lx-scroll-line { animation: lx-scroll 2.4s ease-in-out infinite; transform-origin: top; }
+@keyframes lx-scroll { 0% { transform: scaleY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* The page scrollbar takes its style from body, which sits outside .lx-root */
+.lx-root ::-webkit-scrollbar-thumb, body:has(> .lx-root)::-webkit-scrollbar-thumb { background: #8C6A47; }
+.lx-root ::-webkit-scrollbar-thumb:hover, body:has(> .lx-root)::-webkit-scrollbar-thumb:hover { background: #E2A862; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-rise { animation: none; opacity: 1; transform: none; }
+  .lx-scroll-line { animation: none; opacity: 0.6; transform: none; }
+}
+
+/* ─── Admin theme: the same beige system as the public site ───── */
 .admin-root {
-  --background: 0 0% 98%;
-  --foreground: 0 0% 4%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 4%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 4%;
-  --primary: 0 0% 4%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 95%;
-  --secondary-foreground: 0 0% 20%;
-  --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 0 0% 95%;
-  --accent-foreground: 0 0% 20%;
+  --background: 30 28% 94%;        /* #F4EFEA Warm Bone */
+  --foreground: 26 15% 15%;        /* #2B2520 Espresso */
+  --card: 30 33% 97%;              /* #FBF8F4 Linen */
+  --card-foreground: 26 15% 15%;
+  --popover: 30 33% 97%;
+  --popover-foreground: 26 15% 15%;
+  --primary: 26 15% 15%;
+  --primary-foreground: 30 28% 94%;
+  --secondary: 34 24% 87%;         /* #E6DFD5 Calcite Sand */
+  --secondary-foreground: 26 15% 15%;
+  --muted: 34 24% 87%;
+  --muted-foreground: 30 11% 43%;  /* #7A6E62 */
+  --accent: 35 65% 89%;            /* #F6E7D2 */
+  --accent-foreground: 26 15% 15%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 4%;
+  --border: 33 22% 81%;            /* #D9CFC2 */
+  --input: 33 22% 81%;
+  --ring: 33 68% 64%;              /* champagne */
   --sidebar-width: 256px;
-  background-color: hsl(0 0% 98%);
-  color: hsl(0 0% 4%);
+  background-color: #F4EFEA;
+  color: #2B2520;
   min-height: 100vh;
+}
+.admin-root h1, .admin-root h2, .admin-root h3 {
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.005em;
 }
 
 /* Smooth scrollbar */
@@ -174,9 +368,30 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #C5BAAB;
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #8C6A47;
+}
+
+/* Floating action buttons step aside while the mobile menu or filter sheet is open */
+body[data-overlay-open] .fano-fab { visibility: hidden; }
+/* Over the homepage hero the floating CTA steps back to an outline, leaving the hero's own button to lead */
+body[data-hero-in-view] .fano-fab {
+  background: rgba(11, 18, 32, 0.45);
+  border-color: rgba(226, 168, 98, 0.55);
+  color: #F4EFEA;
+  text-shadow: none;
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+}
+body[data-hero-in-view] .fano-fab:hover { background: #E2A862; border-color: #E2A862; color: #0B1220; }
+.fano-web :is(a,button):focus-visible,
+header :is(a,button):focus-visible { outline:2px solid #E2A862; outline-offset:5px; }
+#discover { scroll-margin-top:100px; }
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .fano-web *, .fano-web *::before, .fano-web *::after { animation-duration:.01ms !important; animation-delay:0ms !important; transition-duration:.01ms !important; }
+  .fano-web .group:hover img { transform:none; }
 }

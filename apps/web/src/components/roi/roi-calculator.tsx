@@ -24,7 +24,12 @@ export function RoiCalculator({
   propertyId,
   propertyTitle,
 }: RoiCalculatorProps) {
-  const [inputs, setInputs] = useState<RoiInputs>(() => defaultRoiInputs(price, sizeSqft));
+  // On a listing the estimate opens on a cash purchase: a full mortgage at today's rates
+  // shows a monthly loss before the visitor has changed anything
+  const [inputs, setInputs] = useState<RoiInputs>(() => ({
+    ...defaultRoiInputs(price, sizeSqft),
+    ...(variant === "compact" ? { useMortgage: false } : {}),
+  }));
   const [showAdvanced, setShowAdvanced] = useState(variant === "full");
   const result = useMemo(() => calculateRoi(inputs), [inputs]);
 
@@ -34,9 +39,9 @@ export function RoiCalculator({
   const compact = variant === "compact";
 
   return (
-    <div className={cn("grid gap-6", !compact && "lg:grid-cols-5 lg:gap-10")}>
+    <div className={cn("grid gap-8", !compact && "lg:grid-cols-5 lg:gap-14")}>
       {/* ── Inputs ─────────────────────────────────────────── */}
-      <div className={cn("min-w-0 space-y-6", !compact && "lg:col-span-3")}>
+      <div className={cn("min-w-0 space-y-8", !compact && "lg:col-span-3")}>
         <Section title="Property">
           <div className="grid sm:grid-cols-2 gap-4">
             <NumberField label="Purchase price" suffix="AED" value={inputs.price} onChange={set("price")} step={50_000} />
@@ -45,7 +50,7 @@ export function RoiCalculator({
         </Section>
 
         <Section title="Financing">
-          <div className="inline-flex rounded-full border border-border p-1 bg-surface shadow-[0_1px_0_rgba(255,255,255,.7)_inset,0_10px_30px_-14px_rgba(43,37,32,.22)]">
+          <div className="inline-flex gap-1 rounded-full border border-lx-line p-1" role="group" aria-label="Financing">
             {[
               { label: "Mortgage", value: true },
               { label: "Cash", value: false },
@@ -53,10 +58,11 @@ export function RoiCalculator({
               <button
                 key={opt.label}
                 type="button"
+                aria-pressed={inputs.useMortgage === opt.value}
                 onClick={() => set("useMortgage")(opt.value)}
                 className={cn(
-                  "px-5 h-9 rounded-full text-sm font-medium transition-colors",
-                  inputs.useMortgage === opt.value ? "bg-[#2B2520] text-white" : "text-zinc-600 hover:text-[#2B2520]"
+                  "h-9 rounded-full px-5 text-[13px] transition-colors",
+                  inputs.useMortgage === opt.value ? "bg-lx-gold text-lx-page" : "text-lx-text/65 hover:text-lx-gold"
                 )}
               >
                 {opt.label}
@@ -94,20 +100,20 @@ export function RoiCalculator({
           </div>
         </Section>
 
-        <div className="rounded-2xl border border-border">
+        <div className="border-y border-lx-line">
           <button
             type="button"
             onClick={() => setShowAdvanced((v) => !v)}
-            className="w-full flex items-center justify-between px-5 py-4 text-sm font-medium text-[#2B2520]"
+            className="flex w-full items-center justify-between py-4 text-left font-display text-[20px] font-normal text-lx-text"
             aria-expanded={showAdvanced}
           >
             Detailed assumptions
-            <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
+            <ChevronDown className={cn("h-4 w-4 text-lx-gold transition-transform", showAdvanced && "rotate-180")} strokeWidth={1.5} />
           </button>
           {showAdvanced && (
-            <div className="px-5 pb-5 space-y-5 border-t border-border pt-5">
+            <div className="space-y-7 border-t border-lx-line py-6">
               <div>
-                <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-3">Purchase costs</p>
+                <p className={subLabelClass}>Purchase costs</p>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <NumberField label="DLD transfer fee" suffix="%" value={inputs.dldFeePct} onChange={set("dldFeePct")} step={0.1} />
                   <NumberField
@@ -129,7 +135,7 @@ export function RoiCalculator({
                 </div>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-3">Running costs</p>
+                <p className={subLabelClass}>Running costs</p>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <NumberField label="Vacancy" suffix="%" value={inputs.vacancyPct} onChange={set("vacancyPct")} min={0} max={100} />
                   <NumberField label="Maintenance" suffix="% rent" value={inputs.maintenancePct} onChange={set("maintenancePct")} min={0} max={100} />
@@ -137,7 +143,7 @@ export function RoiCalculator({
                 </div>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-3">Growth &amp; exit</p>
+                <p className={subLabelClass}>Growth &amp; exit</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <NumberField label="Value growth" suffix="%/yr" value={inputs.appreciationPct} onChange={set("appreciationPct")} step={0.5} />
                   <NumberField label="Rent growth" suffix="%/yr" value={inputs.rentGrowthPct} onChange={set("rentGrowthPct")} step={0.5} />
@@ -152,9 +158,9 @@ export function RoiCalculator({
 
       {/* ── Results ────────────────────────────────────────── */}
       <div className={cn("min-w-0 space-y-6", !compact && "lg:col-span-2")}>
-        <div className={cn("rounded-2xl bg-[#2B2520] text-white p-6", !compact && "lg:sticky lg:top-24")}>
-          <p className="text-xs font-medium uppercase tracking-widest text-[#E2A862]">Your estimated returns</p>
-          <div className="grid grid-cols-2 gap-4 mt-5">
+        <div className={cn("rounded-[4px] bg-lx-surface p-6 text-lx-text lg:p-8", !compact && "lg:sticky lg:top-28")}>
+          <p className="lx-eyebrow text-lx-gold">Your estimated returns</p>
+          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6">
             <Metric label="Net rental yield" value={pctText(result.netYieldPct)} />
             <Metric label="Cash-on-cash return" value={pctText(result.cashOnCashPct)} />
             <Metric
@@ -170,7 +176,7 @@ export function RoiCalculator({
             />
           </div>
 
-          <div className="mt-6 pt-5 border-t border-white/10 space-y-5 text-sm">
+          <div className="mt-8 space-y-6 border-t border-lx-line pt-6 text-[13px]">
             <Breakdown
               title="Cash needed upfront"
               total={result.cashInvested}
@@ -208,8 +214,8 @@ export function RoiCalculator({
               ]}
             />
           </div>
-          <p className="mt-5 text-xs text-white/50 flex gap-2">
-            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+          <p className="mt-6 flex gap-2 text-[11px] leading-relaxed text-lx-text/50">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Estimates only, based on the assumptions above. Not financial advice. Gross yield:{" "}
             {pctText(result.grossYieldPct)}.
           </p>
@@ -227,10 +233,12 @@ export function RoiCalculator({
   );
 }
 
+const subLabelClass = "mb-4 font-label text-[10px] font-semibold uppercase tracking-[0.2em] text-lx-text/55";
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-[#2B2520] mb-3">{title}</h3>
+      <h3 className="lx-eyebrow mb-4">{title}</h3>
       {children}
     </div>
   );
@@ -265,7 +273,7 @@ function NumberField({
   const id = React.useId();
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-medium text-zinc-500 mb-1.5">
+      <label htmlFor={id} className="mb-1 block text-[12px] text-lx-text/60">
         {label}
       </label>
       <div className="relative">
@@ -288,17 +296,17 @@ function NumberField({
             }
           }}
           className={cn(
-            "w-full h-11 pl-4 rounded-xl border border-border text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent transition-all hover:border-zinc-300 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-            suffix ? "pr-20" : "pr-4"
+            "h-11 w-full border-0 border-b border-lx-line bg-transparent pl-0 text-[15px] tabular-nums text-lx-text transition-colors focus:border-[#E2A862] focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+            suffix ? "pr-20" : "pr-0"
           )}
         />
         {suffix && (
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
+          <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-label text-[10px] uppercase tracking-[0.12em] text-lx-muted">
             {suffix}
           </span>
         )}
       </div>
-      {hint && <p className="text-[11px] text-zinc-400 mt-1 leading-snug">{hint}</p>}
+      {hint && <p className="mt-1.5 text-[11px] leading-snug text-lx-text/50">{hint}</p>}
     </div>
   );
 }
@@ -315,17 +323,17 @@ function Metric({
   tone?: "default" | "negative";
 }) {
   return (
-    <div className="rounded-xl bg-white/5 p-4">
-      <p className="text-[11px] text-white/60">{label}</p>
+    <div className="border-t border-lx-line pt-4">
+      <p className="font-label text-[10px] uppercase tracking-[0.16em] text-lx-text/55">{label}</p>
       <p
         className={cn(
-          "text-xl font-semibold mt-1 tabular-nums [letter-spacing:-0.02em]",
-          tone === "negative" ? "text-red-300" : "text-white"
+          "mt-2 font-display text-[clamp(26px,2.4vw,32px)] font-normal leading-none tabular-nums",
+          tone === "negative" ? "text-[#E08A7A]" : "text-lx-text"
         )}
       >
         {value}
       </p>
-      {sub && <p className="text-[11px] text-[#E2A862] mt-0.5">{sub}</p>}
+      {sub && <p className="mt-1.5 text-[11px] text-lx-gold">{sub}</p>}
     </div>
   );
 }
@@ -343,17 +351,17 @@ function Breakdown({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium text-[#E2A862] mb-2">{title}</p>
+      <p className="mb-2 font-display text-[16px] italic text-lx-gold">{title}</p>
       <dl className="space-y-1.5">
         {rows.map(([label, v]) => (
-          <div key={label} className="flex justify-between gap-4 text-white/70">
+          <div key={label} className="flex justify-between gap-4 text-lx-text/65">
             <dt>{label}</dt>
             <dd className="tabular-nums">{aed(v)}</dd>
           </div>
         ))}
-        <div className="flex justify-between gap-4 pt-1.5 border-t border-white/10 font-medium text-white">
+        <div className="flex justify-between gap-4 border-t border-lx-line pt-1.5 text-lx-text">
           <dt>{totalLabel}</dt>
-          <dd className={cn("tabular-nums", total < 0 && "text-red-300")}>{aed(total)}</dd>
+          <dd className={cn("tabular-nums", total < 0 && "text-[#E08A7A]")}>{aed(total)}</dd>
         </div>
       </dl>
     </div>
@@ -362,35 +370,34 @@ function Breakdown({
 
 function YearTable({ years }: { years: ReturnType<typeof calculateRoi>["years"] }) {
   return (
-    <div className="rounded-2xl border border-border overflow-hidden">
-      <div className="px-5 py-4 border-b border-border bg-zinc-50">
-        <h3 className="text-sm font-semibold text-[#2B2520]">Year-by-year projection</h3>
-      </div>
+    <div className="mt-6 border-t border-lx-line pt-10">
+      <p className="lx-eyebrow mb-3">Projection</p>
+      <h3 className="mb-8 font-display text-[28px] font-normal leading-tight text-lx-text">Year by year</h3>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-left text-xs text-zinc-500">
+            <tr className="border-b border-lx-line text-left">
               {["Year", "Property value", "Annual rent", "Cash flow", "Cumulative cash flow", "Loan balance", "Equity"].map(
-                (h) => (
-                  <th key={h} className="px-5 py-3 font-medium whitespace-nowrap">
+                (h, i) => (
+                  <th key={h} className={cn("whitespace-nowrap py-3 pr-6 font-label text-[10px] font-semibold uppercase tracking-[0.16em] text-lx-text/55", i === 0 && "pl-0")}>
                     {h}
                   </th>
                 )
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-lx-line text-lx-text/80">
             {years.map((y) => (
               <tr key={y.year} className="tabular-nums">
-                <td className="px-5 py-3 font-medium text-[#2B2520]">{y.year}</td>
-                <td className="px-5 py-3 whitespace-nowrap">{aed(y.propertyValue)}</td>
-                <td className="px-5 py-3 whitespace-nowrap">{aed(y.rent)}</td>
-                <td className={cn("px-5 py-3 whitespace-nowrap", y.cashFlow < 0 && "text-red-600")}>{aed(y.cashFlow)}</td>
-                <td className={cn("px-5 py-3 whitespace-nowrap", y.cumulativeCashFlow < 0 && "text-red-600")}>
+                <td className="py-3 pr-6 font-display text-[16px] text-lx-text">{y.year}</td>
+                <td className="whitespace-nowrap py-3 pr-6">{aed(y.propertyValue)}</td>
+                <td className="whitespace-nowrap py-3 pr-6">{aed(y.rent)}</td>
+                <td className={cn("whitespace-nowrap py-3 pr-6", y.cashFlow < 0 && "text-[#E08A7A]")}>{aed(y.cashFlow)}</td>
+                <td className={cn("whitespace-nowrap py-3 pr-6", y.cumulativeCashFlow < 0 && "text-[#E08A7A]")}>
                   {aed(y.cumulativeCashFlow)}
                 </td>
-                <td className="px-5 py-3 whitespace-nowrap">{aed(y.loanBalance)}</td>
-                <td className="px-5 py-3 whitespace-nowrap font-medium">{aed(y.equity)}</td>
+                <td className="whitespace-nowrap py-3 pr-6">{aed(y.loanBalance)}</td>
+                <td className="whitespace-nowrap py-3 pr-0 text-lx-text">{aed(y.equity)}</td>
               </tr>
             ))}
           </tbody>

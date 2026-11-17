@@ -9,10 +9,24 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "Arial", "sans-serif"],
-        display: ["var(--font-montserrat)", "Montserrat", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "Source Serif 4", "Georgia", "serif"],
+        /* Headings are Playfair Display; Montserrat remains for the wordmark and tracked labels */
+        display: ["var(--font-serif)", "Playfair Display", "Georgia", "serif"],
+        serif: ["var(--font-serif)", "Playfair Display", "Georgia", "serif"],
+        label: ["var(--font-montserrat)", "Montserrat", "system-ui", "sans-serif"],
       },
       colors: {
+        /* Public-site navy tokens: RGB channels in globals.css so /<opacity> modifiers compile */
+        lx: {
+          page: "rgb(var(--lx-page-rgb) / <alpha-value>)",
+          surface: "rgb(var(--lx-surface-rgb) / <alpha-value>)",
+          raised: "rgb(var(--lx-raised-rgb) / <alpha-value>)",
+          text: "rgb(var(--lx-text-rgb) / <alpha-value>)",
+          muted: "rgb(var(--lx-muted-rgb) / <alpha-value>)",
+          line: "var(--lx-line)",
+          gold: "#E2A862",
+          bronze: "#8C6A47",
+          pale: "#F6E7D2",
+        },
         /* Fano "Calcite Sand" theme, same as the Fano team app */
         sand: "#E6DFD5",      /* Calcite Sand: page background */
         surface: "#F4EFEA",   /* Warm Bone: cards, panels */
@@ -116,6 +130,9 @@ const config: Config = {
         "2xl": "1rem",
         "3xl": "1.5rem",
         "4xl": "2rem",
+      },
+      opacity: {
+        "92": "0.92",
       },
       maxWidth: {
         "8xl": "88rem",

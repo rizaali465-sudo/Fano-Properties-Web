@@ -1,22 +1,19 @@
-import { Check } from "lucide-react";
-
 export function PropertyAmenities({ amenities }: { amenities: string[] }) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-[#2B2520] mb-6">Amenities & Features</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <p className="lx-eyebrow mb-4">Amenities</p>
+      <h2 className="mb-6 font-display text-[28px] font-normal leading-tight text-lx-text">Amenities &amp; features</h2>
+      <ul className="grid grid-cols-1 border-t border-lx-line sm:grid-cols-2 lg:grid-cols-3">
         {amenities.map((amenity) => (
-          <div
+          <li
             key={amenity}
-            className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 border border-border"
+            className="flex items-center gap-3 border-b border-lx-line py-3 text-[14px] capitalize text-lx-text/80 sm:pr-6"
           >
-            <div className="h-6 w-6 rounded-lg bg-black/5 flex items-center justify-center shrink-0">
-              <Check className="h-3.5 w-3.5 text-[#2B2520]" />
-            </div>
-            <span className="text-sm text-zinc-700 capitalize">{amenity}</span>
-          </div>
+            <span aria-hidden="true" className="h-px w-4 shrink-0 bg-lx-gold" />
+            {amenity}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

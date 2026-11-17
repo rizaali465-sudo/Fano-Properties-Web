@@ -2,25 +2,27 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@fano/utils";
 
+// Small tracked labels built on the theme tokens, so they read correctly on the
+// navy public site and the beige admin alike. Gold variants are the one fixed accent.
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full text-xs font-medium transition-colors",
+  "inline-flex items-center rounded-full font-label font-semibold uppercase tracking-[0.16em] transition-colors",
   {
     variants: {
       variant: {
-        default: "bg-[#2B2520] text-white",
-        secondary: "bg-zinc-100 text-zinc-900",
-        outline: "border border-zinc-200 text-zinc-700",
-        success: "bg-emerald-50 text-emerald-700 border border-emerald-100",
-        warning: "bg-amber-50 text-amber-700 border border-amber-100",
-        destructive: "bg-red-50 text-red-700 border border-red-100",
-        sale: "bg-[#2B2520] text-white",
-        rent: "bg-[#3A322B] text-white",
-        lease: "bg-zinc-600 text-white",
+        default: "bg-primary text-primary-foreground",
+        secondary: "bg-secondary text-secondary-foreground",
+        outline: "border border-border text-foreground",
+        success: "border border-[#8C6A47]/50 text-[#8C6A47]",
+        warning: "border border-[#E2A862] text-[#E2A862]",
+        destructive: "border border-[#B0453A]/60 text-[#B0453A]",
+        sale: "bg-primary text-primary-foreground",
+        rent: "border border-[#E2A862]/60 text-foreground",
+        lease: "bg-[#8C6A47] text-[#F4EFEA]",
       },
       size: {
-        sm: "px-2.5 py-0.5 text-xs",
-        default: "px-3 py-1 text-xs",
-        lg: "px-4 py-1.5 text-sm",
+        sm: "px-2.5 py-0.5 text-[10px]",
+        default: "px-3 py-1 text-[10px]",
+        lg: "px-4 py-1.5 text-[11px]",
       },
     },
     defaultVariants: {

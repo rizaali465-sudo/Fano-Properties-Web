@@ -1,25 +1,31 @@
 import type { Metadata } from "next";
+import { buildPageMeta } from "@/lib/seo";
+
+const title = "Privacy Policy";
+const description = "Fano Properties privacy policy — how we collect, use, and protect your data.";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Fano Properties privacy policy — how we collect, use, and protect your data.",
+  title,
+  description,
   alternates: { canonical: "/privacy-policy" },
+  ...buildPageMeta({ path: "/privacy-policy", title, description }),
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen pt-20">
-      <div className="page-band py-12">
+      <div className="page-band py-14 lg:py-20">
         <div className="container-site">
-          <h1 className="text-4xl lg:text-5xl font-semibold [letter-spacing:-0.025em] text-[#2B2520]">
-            Privacy Policy
+          <p className="lx-eyebrow mb-5">Legal</p>
+          <h1 className="font-display text-[clamp(36px,4.6vw,56px)] font-normal leading-[1.02] tracking-[-0.01em] text-lx-text">
+            Privacy policy
           </h1>
-          <p className="text-zinc-500 mt-3">Last updated: November 4, 2026</p>
+          <p className="mt-5 text-[13px] tracking-[0.04em] text-lx-text/55">Last updated: November 4, 2026</p>
         </div>
       </div>
 
-      <div className="container-site max-w-3xl py-16">
-        <div className="prose prose-zinc max-w-none prose-headings:font-semibold prose-headings:[letter-spacing:-0.02em]">
+      <div className="container-site max-w-3xl py-14 lg:py-20">
+        <div className="prose prose-invert max-w-none prose-headings:font-display prose-headings:font-normal prose-headings:tracking-[-0.01em] prose-headings:text-lx-text prose-h2:text-[28px] prose-h2:mt-12 prose-h2:mb-4 prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-lx-text/80 prose-strong:text-lx-text prose-a:text-lx-gold">
           <h2>Information We Collect</h2>
           <p>
             We collect information you provide directly to us, such as when you submit an inquiry, use our ROI calculator, or communicate with our team. This may include your name, email address, phone number, and property preferences.
@@ -50,15 +56,15 @@ export default function PrivacyPolicyPage() {
 
           <h2>Your Rights</h2>
           <p>
-            Depending on your location, you may have rights regarding your personal data, including the right to access, correct, or delete your data. Contact us at privacy@fanorealestate.com to exercise these rights.
+            Depending on your location, you may have rights regarding your personal data, including the right to access, correct, or delete your data. Contact us at <a href="mailto:info@fanoproperties.com">info@fanoproperties.com</a> to exercise these rights.
           </p>
 
           <h2>Contact Us</h2>
           <p>
             If you have questions about this Privacy Policy, please contact us at:<br />
-            <strong>Fano Real Estate</strong><br />
-            123 Premium Avenue, New York, NY 10001<br />
-            privacy@fanorealestate.com
+            <strong>Fano Properties</strong><br />
+            3404, 34th Floor, Churchill Executive Tower, Business Bay, Dubai, UAE<br />
+            <a href="mailto:info@fanoproperties.com">info@fanoproperties.com</a>
           </p>
         </div>
       </div>

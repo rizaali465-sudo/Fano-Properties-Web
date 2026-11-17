@@ -1,13 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { BedDouble, Bath, Maximize2, MapPin, Store, ArrowRight } from "lucide-react";
-import { cn, isOptimizedImageHost, unitTypeLabel } from "@fano/utils";
-import { Badge } from "./badge";
+import { cn, isOptimizedImageHost, unitTypeLabel, formatPlace, splitListingTitle } from "@fano/utils";
+import { SafeImage } from "./safe-image";
 
-// Tiny warm-beige JPEG used as blur placeholder before real image loads
+// Tiny navy JPEG used as blur placeholder before the real image loads
 const BLUR_PLACEHOLDER =
   "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAAECAADAAQDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABQQG/8QAHBAAAgMAAwEAAAAAAAAAAAAAAQIDBAASITH/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AJXi1KrXLpKhbIxWkQMVIOhGR3Qf/9k=";
 
@@ -32,136 +30,64 @@ export interface PropertyCardProps {
   priority?: boolean;
 }
 
-function formatPrice(price: number, currency = "AED"): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(price);
+function formatMoney(price: number, currency = "AED"): string {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(price) + (currency === "AED" ? "" : ` ${currency}`);
 }
 
+// Photograph, then serif name, tracked place line and one quiet line of facts;
+// the price sits alone in serif. No box, no border. Hover: slow push-in, slight dim.
 function PropertyCard({
-  title,
-  slug,
-  propertyType,
-  unitType,
-  priceUnit,
-  listingType,
-  price,
-  currency = "AED",
-  location,
-  city,
-  bedrooms,
-  bathrooms,
-  sqft,
-  coverImage,
-  featured,
-  className,
-  priority = false,
+  title, slug, propertyType, unitType, priceUnit, listingType, price, currency = "AED",
+  location, city, bedrooms, bathrooms, sqft, coverImage, className, priority = false,
 }: PropertyCardProps) {
   const isCommercial = propertyType === "commercial";
+  const { headline } = splitListingTitle(title);
+  const place = formatPlace(location, city);
+  const facts = (isCommercial
+    ? [unitTypeLabel(unitType), sqft > 0 ? `${sqft.toLocaleString("en-US")} sq ft` : null]
+    : [
+        bedrooms > 0 ? `${bedrooms} bedroom${bedrooms === 1 ? "" : "s"}` : null,
+        sqft > 0 ? `${sqft.toLocaleString("en-US")} sq ft` : null,
+        bathrooms > 0 ? `${bathrooms} bath` : null,
+      ]
+  ).filter(Boolean) as string[];
+  const label = listingType === "rent" ? "To let" : listingType === "lease" ? "To lease" : null;
 
   return (
-    <Link
-      href={`/properties/${slug}`}
-      className={cn(
-        "group flex flex-col overflow-hidden rounded-3xl h-full border border-[#C5BAAB]/50",
-        "bg-gradient-to-b from-[#FAF7F3] to-[#F4EFEA] shadow-[0_1px_0_rgba(255,255,255,.7)_inset,0_10px_30px_-14px_rgba(43,37,32,.22)]",
-        "transition-all duration-500 hover:-translate-y-1 hover:border-[#E2A862]/60 hover:shadow-[0_24px_48px_-18px_rgba(43,37,32,.35),0_0_0_1px_rgba(226,168,98,.25)]",
-        className
-      )}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 shrink-0">
-        <Image
+    <Link href={`/properties/${slug}`} className={cn("group block h-full", className)}>
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-lx-raised">
+        <SafeImage
           src={coverImage}
           unoptimized={!isOptimizedImageHost(coverImage)}
           alt={title}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 420px"
+          quality={85}
+          className="object-cover transition-[transform,opacity] duration-[1400ms] ease-out group-hover:scale-[1.04] group-hover:opacity-90"
           placeholder="blur"
           blurDataURL={BLUR_PLACEHOLDER}
           priority={priority}
         />
-        {/* Shimmer sweep on hover */}
-        <div
-          className="absolute inset-0 pointer-events-none translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out"
-          style={{
-            background:
-              "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)",
-          }}
-        />
-        {/* Dark overlay + "View Property" label */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-5">
-          <span className="inline-flex items-center gap-1.5 text-white text-sm font-semibold tracking-wide">
-            View Property <ArrowRight className="h-3.5 w-3.5" />
+        {label && (
+          <span className="absolute left-4 top-4 rounded-full border border-lx-gold/60 bg-lx-page/60 px-3 py-1 font-label text-[9px] font-semibold uppercase tracking-[0.2em] text-lx-pale backdrop-blur-sm">
+            {label}
           </span>
-        </div>
-        <div className="absolute top-3 left-3 flex gap-2">
-          <Badge variant={listingType as "sale" | "rent" | "lease"} size="sm">
-            For {listingType}
-          </Badge>
-          {featured && (
-            <Badge variant="default" size="sm" className="bg-white/90 text-black backdrop-blur-sm">
-              Featured
-            </Badge>
-          )}
-        </div>
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-lg px-2.5 py-1">
-          <span className="text-xs font-medium capitalize text-black">
-            {isCommercial ? unitTypeLabel(unitType) : propertyType}
-          </span>
-        </div>
+        )}
       </div>
 
-      <div className="flex flex-col flex-1 p-5">
-        <div className="mb-3">
-          <p className="font-display text-2xl font-semibold tracking-tight [letter-spacing:-0.02em]" style={{ color: "#6B5038" }}>
-            {formatPrice(price, currency)}
-            {priceUnit === "per_sqft" && (
-              <span className="text-sm font-normal text-text-secondary"> /sq ft</span>
-            )}
-            {listingType === "rent" && (
-              <span className="text-sm font-normal text-text-secondary">/mo</span>
-            )}
-          </p>
-        </div>
-
-        <h3 className="font-display font-semibold mb-1.5 line-clamp-1 transition-colors group-hover:text-[#8C6A47]" style={{ color: "#2B2520" }}>
-          {title}
+      <div className="pt-6">
+        <h3 className="truncate font-display text-[22px] font-normal leading-tight text-lx-text transition-colors group-hover:text-lx-gold">
+          {headline}
         </h3>
-
-        <div className="flex items-center gap-1.5 mb-4 flex-1" style={{ color: "#8C6A47" }}>
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          <p className="text-sm line-clamp-1">
-            {location}, {city}
+        <p className="mt-2 truncate font-label text-[10px] font-semibold uppercase tracking-[0.2em] text-lx-muted">{place}</p>
+        <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-lx-line pt-4">
+          <p className="font-display text-[19px] leading-none text-lx-text">
+            <span className="mr-2 font-label text-[10px] font-semibold uppercase tracking-[0.2em] text-lx-muted">{currency}</span>
+            {formatMoney(price, currency)}
+            {priceUnit === "per_sqft" && <span className="ml-1 text-[12px] text-lx-muted">/sq ft</span>}
+            {listingType === "rent" && <span className="ml-1 text-[12px] text-lx-muted">/mo</span>}
           </p>
-        </div>
-
-        <div className="h-px bg-border mb-4" />
-
-        <div className="flex items-center justify-between text-sm" style={{ color: "#8C6A47" }}>
-          {isCommercial ? (
-            <div className="flex items-center gap-1.5">
-              <Store className="h-4 w-4" />
-              <span>{unitTypeLabel(unitType)}</span>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-1.5">
-                <BedDouble className="h-4 w-4" />
-                <span>{bedrooms} Beds</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Bath className="h-4 w-4" />
-                <span>{bathrooms} Baths</span>
-              </div>
-            </>
-          )}
-          <div className="flex items-center gap-1.5">
-            <Maximize2 className="h-4 w-4" />
-            <span>{sqft.toLocaleString("en-US")} sqft</span>
-          </div>
+          {facts.length > 0 && <p className="truncate text-right text-[12px] text-lx-text/55">{facts.join(" · ")}</p>}
         </div>
       </div>
     </Link>

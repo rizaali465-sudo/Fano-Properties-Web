@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
-import { HeroSection } from "@/components/sections/hero";
-import { FeaturedPropertiesSection } from "@/components/sections/featured-properties";
-import { PropertyTypesSection } from "@/components/sections/property-types";
-import { WhyUsSection } from "@/components/sections/why-us";
-import { AgentsShowcaseSection } from "@/components/sections/agents-showcase";
-import { LatestArticlesSection } from "@/components/sections/latest-articles";
-import { CtaSection } from "@/components/sections/cta-section";
-import { StatsSection } from "@/components/sections/stats-section";
+import { buildPageMeta } from "@/lib/seo";
 import { getFeaturedProperties } from "@/lib/queries/properties";
 import { getAgents } from "@/lib/queries/agents";
 import { getLatestArticles } from "@/lib/queries/blog";
 import { SOCIAL_LINKS } from "@/lib/social-links";
+import { LuxHero } from "@/components/luxury/lux-hero";
+import { LuxStatement } from "@/components/luxury/lux-statement";
+import { LuxResidences } from "@/components/luxury/lux-residences";
+import { LuxCollections } from "@/components/luxury/lux-collections";
+import { LuxIntroduction } from "@/components/luxury/lux-introduction";
+import { LuxTeam } from "@/components/luxury/lux-team";
+import { LuxPeople } from "@/components/luxury/lux-people";
+import { LuxJournal } from "@/components/luxury/lux-journal";
+import { LuxClosing } from "@/components/luxury/lux-closing";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanoproperties.com";
 
+const HOME_TITLE = "Fano Properties — Dubai Real Estate | Offices, Apartments & Villas";
+const HOME_DESCRIPTION =
+  "Offices for sale in Business Bay and on Sheikh Zayed Road, plus apartments and villas across Dubai. Fano Properties, RERA-registered agency No. 49852.";
+
 export const metadata: Metadata = {
-  title: { absolute: "Fano Properties — Luxury Real Estate in Dubai" },
-  description:
-    "Discover luxury properties for sale and rent in Dubai. Find your dream home with Fano Properties — premium real estate, exceptional service.",
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
   alternates: { canonical: SITE_URL },
+  ...buildPageMeta({ path: "/", title: HOME_TITLE, description: HOME_DESCRIPTION }),
 };
 
 // Rendered on request: the build has no database, so a cached build-time page shows no listings
@@ -36,7 +42,7 @@ const jsonLd = {
       description: "Luxury real estate agency specialising in premium properties for sale and rent in Dubai and beyond.",
       address: {
         "@type": "PostalAddress",
-        streetAddress: "3404, 34th Floor, Churchill Tower, Business Bay",
+        streetAddress: "3404, 34th Floor, Churchill Executive Tower, Business Bay",
         addressLocality: "Dubai",
         addressCountry: "AE",
       },
@@ -62,25 +68,30 @@ const jsonLd = {
 
 export default async function HomePage() {
   const [properties, agents, articles] = await Promise.all([
-    getFeaturedProperties(6).catch(() => []),
-    getAgents(5).catch(() => []),
-    getLatestArticles(3).catch(() => []),
+    getFeaturedProperties(3).catch(() => []),
+    getAgents().catch(() => []),
+    getLatestArticles(2).catch(() => []),
   ]);
+
+  const jsonLdScript = (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <HeroSection />
-      <FeaturedPropertiesSection properties={properties as never} />
-      <StatsSection />
-      <PropertyTypesSection />
-      <WhyUsSection />
-      {agents.length > 0 && <AgentsShowcaseSection agents={agents as never} />}
-      <LatestArticlesSection articles={articles as never} />
-      <CtaSection />
+      {jsonLdScript}
+      <LuxHero />
+      <LuxStatement />
+      <LuxResidences properties={properties as never} />
+      <LuxCollections />
+      <LuxIntroduction />
+      <LuxTeam advisor={(agents as never[])[0] as never} />
+      <LuxPeople people={agents as never[]} />
+      <LuxJournal articles={articles as never} />
+      <LuxClosing />
     </>
   );
 }

@@ -9,15 +9,15 @@
   },
   "scripts": {
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push --accept-data-loss",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^6.7.0"
+    "@prisma/client": "^6.7.0",
+    "prisma": "^6.7.0"
   },
   "devDependencies": {
-    "prisma": "^6.7.0",
     "typescript": "^5.8.2"
   }
 }
