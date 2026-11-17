@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
 const HERO_VIDEO = "/hero-aerial.mp4";
-const HERO_POSTER = "/hero-aerial.jpg";
+const HERO_POSTER = "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=85&w=2560&auto=format";
 const PAUSE_KEY = "fano-hero-video-paused";
 
 // Full-screen film under a gradient that deepens toward the bottom third.

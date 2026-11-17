@@ -37,7 +37,7 @@ export default function AboutPage() {
       <section className="container-site pt-10 lg:pt-14">
         <div className="relative aspect-[16/9] overflow-hidden rounded-[4px] bg-lx-raised lg:aspect-[21/9]">
           <Image
-            src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?q=80&w=1973&auto=format"
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=85&w=2560&auto=format"
             alt="The Fano Properties team at work"
             fill
             sizes="100vw"
@@ -72,7 +72,7 @@ export default function AboutPage() {
 
             <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-lx-raised">
               <Image
-                src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=800&auto=format"
+                src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=85&w=1200&auto=format"
                 alt="Our mission"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
