@@ -3,6 +3,7 @@ import { buildPageMeta } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { SectionHeader } from "@/components/shared/section-header";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const title = "About Us | Dubai Real Estate Agency | RERA 49852";
 const description = "Fano Properties is a RERA-registered (No. 49852) real estate agency in Business Bay, Dubai, for commercial and residential property to buy, sell and lease.";
@@ -21,6 +22,14 @@ const values = [
   { title: "Global reach", description: "Helping investors from around the world buy property in Dubai, in person or remotely." },
 ];
 
+// Only facts that can be checked on the RERA register and on our Property Finder and Bayut profiles
+const credentials = [
+  { label: "RERA registered", value: "No. 49852", note: "Licensed by Dubai's Real Estate Regulatory Agency" },
+  { label: "Property Finder", value: "SuperAgents", note: "Advisors with Property Finder SuperAgent status and verified listings" },
+  { label: "Bayut", value: "TruBroker™", note: "Advisors carrying Bayut's TruBroker™ badge, with authenticity-checked listings" },
+  { label: "Our office", value: "Business Bay", note: "Office 3404, Churchill Executive Tower, Business Bay, Dubai" },
+];
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen pt-20">
@@ -37,13 +46,34 @@ export default function AboutPage() {
       <section className="container-site pt-10 lg:pt-14">
         <div className="relative aspect-[16/9] overflow-hidden rounded-[4px] bg-lx-raised lg:aspect-[21/9]">
           <Image
-            src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?q=80&w=1973&auto=format"
-            alt="The Fano Properties team at work"
+            src="/hero-dubai.jpg"
+            alt="Sheikh Zayed Road and the Dubai skyline"
             fill
             sizes="100vw"
-            className="object-cover"
+            className="object-cover object-[50%_45%]"
             priority
           />
+        </div>
+      </section>
+
+      {/* Credentials: verifiable registrations and portal badges */}
+      <section className="section-y">
+        <div className="container-site">
+          <SectionHeader
+            eyebrow="Credentials"
+            title="Registered, verified, accountable"
+            description="Every Fano advisor works under our RERA licence, and our listings are checked by Dubai's leading property portals."
+            className="mb-14"
+          />
+          <div className="grid gap-10 border-t border-lx-line pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            {credentials.map((c) => (
+              <div key={c.label} className="lg:border-l lg:border-lx-line lg:px-8 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                <p className="lx-eyebrow">{c.label}</p>
+                <p className="mt-4 font-display text-[28px] font-normal leading-tight text-lx-gold">{c.value}</p>
+                <p className="mt-3 text-[14px] leading-[1.8] text-lx-text/70">{c.note}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -72,8 +102,8 @@ export default function AboutPage() {
 
             <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-lx-raised">
               <Image
-                src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=800&auto=format"
-                alt="Our mission"
+                src="/collection-offices.webp"
+                alt="A modern office floor in Dubai"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
@@ -104,6 +134,33 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Where to find us: social channels and portal profiles */}
+      <section className="section-y">
+        <div className="container-site">
+          <SectionHeader
+            eyebrow="Follow our work"
+            title="See our latest listings"
+            description="New properties and market updates, shared first on our channels and portal profiles."
+            align="center"
+            className="mb-12"
+          />
+          <ul className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-full flex-col items-center gap-3 rounded-[4px] border border-lx-line px-4 py-6 text-center text-lx-text transition-colors hover:border-lx-gold hover:text-lx-gold"
+                >
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                  <span className="text-[13px] font-medium tracking-[0.04em]">{label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
     </div>
   );
 }
