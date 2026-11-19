@@ -15,7 +15,7 @@ interface Inquiry {
   phone?: string | null;
   message: string;
   property?: { title: string; slug: string } | null;
-  agent?: { firstName: string; lastName: string } | null;
+  agent?: { firstName: string; lastName: string | null } | null;
   createdAt: Date;
 }
 
@@ -27,10 +27,10 @@ interface InquiriesTableProps {
 }
 
 const statusColors: Record<string, string> = {
-  new: "bg-amber-50 text-amber-700",
-  contacted: "bg-blue-50 text-blue-700",
+  new: "bg-[#F6E7D2] text-[#8C6A47]",
+  contacted: "bg-[#E6DFD5] text-[#2B2520]",
   in_progress: "bg-purple-50 text-purple-700",
-  closed: "bg-green-50 text-green-700",
+  closed: "bg-[#F6E7D2] text-[#6B5038]",
 };
 
 export function InquiriesTable({ inquiries, total, page, pageSize }: InquiriesTableProps) {
@@ -42,11 +42,11 @@ export function InquiriesTable({ inquiries, total, page, pageSize }: InquiriesTa
 
   return (
     <div>
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="rounded-[4px] border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-secondary/40">
+              <tr className="border-b border-border">
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Contact</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Related To</th>
@@ -87,11 +87,12 @@ export function InquiriesTable({ inquiries, total, page, pageSize }: InquiriesTa
                       <p className="text-xs text-muted-foreground line-clamp-2">{inq.message}</p>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(inq.createdAt).toLocaleDateString()}
+                      {new Date(inq.createdAt).toLocaleDateString("en-US", { timeZone: "UTC" })}
                     </td>
                     <td className="px-4 py-3">
                       <select
                         defaultValue={inq.status}
+                        aria-label={`Status for ${inq.firstName} ${inq.lastName}`.trim()}
                         onChange={(e) => handleStatusChange(inq.id, e.target.value)}
                         className={cn(
                           "px-2 py-1 rounded-lg text-xs font-medium border-0 cursor-pointer focus:outline-none",

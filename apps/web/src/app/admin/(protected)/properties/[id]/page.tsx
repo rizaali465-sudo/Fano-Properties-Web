@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { prisma } from "@fano/db";
+import { isUploadStorageConfigured } from "@fano/utils";
 import { PropertyForm } from "../_components/property-form";
 
 export const metadata: Metadata = { title: "Edit Property" };
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "Edit Property" };
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [property, agents] = await Promise.all([
-    prisma.property.findUnique({ where: { id } }),
+    prisma.property.findUnique({ where: { id }, include: { images: { orderBy: { position: "asc" } } } }),
     prisma.agent.findMany({
       where: { active: true },
       select: { id: true, firstName: true, lastName: true },
@@ -22,11 +23,11 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
   return (
     <div className="p-6 lg:p-8 max-w-3xl space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/properties" className="h-9 w-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+        <Link href="/admin/properties" className="h-9 w-9 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-semibold text-foreground [letter-spacing:-0.02em]">Edit Property</h1>
+          <h1 className="font-display text-[28px] font-normal leading-tight text-foreground">Edit Property</h1>
           <p className="text-muted-foreground text-sm truncate">{property.title}</p>
         </div>
       </div>
@@ -34,14 +35,18 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
       <PropertyForm
         agents={agents}
         propertyId={property.id}
+        uploadsEnabled={isUploadStorageConfigured()}
+        defaultGallery={property.images.map((img) => img.url)}
         defaultValues={{
           title: property.title,
           description: property.description,
           propertyType: property.propertyType,
           listingType: property.listingType,
           status: property.status,
+          unitType: property.unitType,
           price: parseFloat(property.price.toString()),
-          currency: property.currency,
+          priceUnit: property.priceUnit,
+          currency: "AED" as const,
           location: property.location,
           city: property.city,
           state: property.state ?? undefined,
@@ -54,6 +59,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
           published: property.published,
           agentId: property.agentId ?? undefined,
           metaTitle: property.metaTitle ?? undefined,
+          permitNumber: property.permitNumber ?? undefined,
           metaDescription: property.metaDescription ?? undefined,
         }}
       />

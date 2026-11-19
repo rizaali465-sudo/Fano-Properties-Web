@@ -9,6 +9,8 @@ interface RelatedPropertiesProps {
     listingType: string;
     price: number | string;
     currency: string;
+    unitType?: string | null;
+    priceUnit?: string | null;
     location: string;
     city: string;
     bedrooms: number;
@@ -22,13 +24,30 @@ interface RelatedPropertiesProps {
 export function RelatedProperties({ properties }: RelatedPropertiesProps) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-black mb-6">Similar Properties</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <p className="lx-eyebrow mb-4">You may also like</p>
+      <h2 className="mb-12 font-display text-[clamp(32px,3.8vw,50px)] font-normal leading-[1.02] tracking-[-0.01em] text-lx-text">
+        Similar <span className="italic text-lx-pale">properties.</span>
+      </h2>
+      <div className="grid grid-cols-1 gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
         {properties.map((p) => (
           <PropertyCard
             key={p.id}
-            {...p}
-            price={typeof p.price === "string" ? parseFloat(p.price) : p.price}
+            id={p.id}
+            title={p.title}
+            slug={p.slug}
+            propertyType={p.propertyType}
+            unitType={p.unitType}
+            priceUnit={p.priceUnit}
+            listingType={p.listingType}
+            price={Number(p.price)}
+            currency={p.currency}
+            location={p.location}
+            city={p.city}
+            bedrooms={p.bedrooms}
+            bathrooms={p.bathrooms}
+            sqft={p.sqft}
+            coverImage={p.coverImage}
+            featured={p.featured}
           />
         ))}
       </div>

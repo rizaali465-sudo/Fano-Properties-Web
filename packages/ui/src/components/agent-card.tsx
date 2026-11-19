@@ -3,23 +3,29 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail } from "lucide-react";
 import { cn } from "@fano/utils";
 
 export interface AgentCardProps {
   id: string;
   firstName: string;
-  lastName: string;
+  lastName: string | null;
   slug: string;
   avatar?: string | null;
   title?: string | null;
   specialization?: string | null;
+  licenseNumber?: string | null;
+  languages?: string[];
   phone?: string | null;
-  email: string;
+  email: string | null;
   totalListings?: number;
   className?: string;
 }
 
+const BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAAECAADAAQDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABQQG/8QAHBAAAgMAAwEAAAAAAAAAAAAAAQIDBAASITH/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AJXi1KrXLpKhbIxWkQMVIOhGR3Qf/9k=";
+
+// A gallery-style team card: the portrait, then a serif name, the role and a quiet
+// line of facts under a hairline. No box, no shadow; the photograph carries the card.
 function AgentCard({
   firstName,
   lastName,
@@ -27,69 +33,62 @@ function AgentCard({
   avatar,
   title,
   specialization,
+  licenseNumber,
+  languages = [],
   phone,
   email,
   totalListings,
   className,
 }: AgentCardProps) {
+  const facts = [
+    licenseNumber ? `BRN ${licenseNumber}` : null,
+    totalListings ? `${totalListings} listing${totalListings === 1 ? "" : "s"}` : null,
+  ].filter(Boolean);
+
   return (
-    <Link
-      href={`/agents/${slug}`}
-      className={cn(
-        "group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-border h-full",
-        "transition-all duration-500 hover:shadow-xl hover:-translate-y-1",
-        className
-      )}
-    >
-      <div className="relative h-20 w-20 rounded-full overflow-hidden bg-zinc-100 mb-4 ring-2 ring-transparent group-hover:ring-[#c3ae8f]/40 transition-all duration-300">
+    <Link href={`/agents/${slug}`} className={cn("group flex h-full flex-col", className)}>
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-lx-raised">
         {avatar ? (
           <Image
             src={avatar}
-            alt={`${firstName} ${lastName}`}
+            alt={`${firstName} ${lastName ?? ""}`.trim()}
             fill
-            sizes="80px"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            quality={90}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+            className="object-cover object-top transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-zinc-100">
-            <span className="text-2xl font-semibold text-zinc-400">
-              {firstName[0]}{lastName[0]}
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="font-display text-5xl font-normal text-lx-gold/60">
+              {firstName[0]}
+              {lastName?.[0]}
             </span>
           </div>
         )}
       </div>
 
-      <div className="flex-1 flex flex-col items-center">
-        <h3 className="font-semibold text-lg" style={{ color: "#3d3020" }}>
+      <div className="flex flex-1 flex-col pt-5">
+        <h3 className="font-display text-[24px] font-normal leading-tight text-lx-text transition-colors group-hover:text-lx-gold">
           {firstName} {lastName}
         </h3>
-        {title && (
-          <p className="text-sm mt-0.5" style={{ color: "#9a7957" }}>{title}</p>
-        )}
-        {specialization && (
-          <p className="text-xs mt-1" style={{ color: "#b09070" }}>{specialization}</p>
+        {title && <p className="mt-1 text-[13px] text-lx-text/65">{title}</p>}
+        {specialization && <p className="mt-1 text-[12px] text-lx-muted">{specialization}</p>}
+
+        {languages.length > 0 && (
+          <p className="mt-3 font-label text-[10px] font-semibold uppercase tracking-[0.18em] text-lx-gold">
+            {languages.join(" · ")}
+          </p>
         )}
 
-        {totalListings !== undefined && (
-          <div className="mt-3 px-3 py-1 rounded-full border" style={{ backgroundColor: "#faf7f2", borderColor: "#e6d8c4" }}>
-            <span className="text-xs font-medium" style={{ color: "#9a7957" }}>
-              {totalListings} listings
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-4 flex gap-2 w-full">
-        {phone && (
-          <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border transition-colors" style={{ borderColor: "#e6d8c4", color: "#9a7957" }}>
-            <Phone className="h-3.5 w-3.5" />
-            <span>Call</span>
-          </div>
-        )}
-        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border transition-colors" style={{ borderColor: "#e6d8c4", color: "#9a7957" }}>
-          <Mail className="h-3.5 w-3.5" />
-          <span>Email</span>
+        <div className="mt-auto flex items-center justify-between gap-4 border-t border-lx-line pt-3">
+          <p className="text-[12px] text-lx-text/55">{facts.join(" · ")}</p>
+          <span className="inline-flex items-center gap-3 text-[12px] font-medium text-lx-text after:h-px after:w-6 after:bg-lx-gold after:transition-all after:duration-300 group-hover:after:w-10">
+            View profile
+          </span>
         </div>
+        {(phone || email) && <span className="sr-only">{[phone, email].filter(Boolean).join(", ")}</span>}
       </div>
     </Link>
   );

@@ -1,18 +1,34 @@
 import { prisma } from "@fano/db";
 import type { PropertyFilters } from "@fano/types";
+import { cached, CACHE_TAGS } from "@/lib/cache";
+import { publicAgent } from "@/lib/queries/agents";
 
-export async function getFeaturedProperties(limit = 6) {
-  return prisma.property.findMany({
+// Prisma returns Decimal objects for price/lat/lng which can't cross the
+// Server → Client Component boundary. Convert them to plain numbers here.
+function serialize<T extends { price: unknown; lat?: unknown; lng?: unknown }>(p: T) {
+  return {
+    ...p,
+    price: Number(p.price),
+    lat: p.lat != null ? Number(p.lat) : null,
+    lng: p.lng != null ? Number(p.lng) : null,
+  };
+}
+
+async function getFeaturedPropertiesUncached(limit = 6) {
+  const rows = await prisma.property.findMany({
     where: { featured: true, published: true },
     take: limit,
     orderBy: { createdAt: "desc" },
     include: { images: { orderBy: { position: "asc" }, take: 1 } },
   });
+  return rows.map(serialize);
 }
 
-export async function getProperties(filters: PropertyFilters = {}) {
+async function getPropertiesUncached(filters: PropertyFilters = {}) {
   const {
     search,
+    category,
+    unitType,
     propertyType,
     listingType,
     city,
@@ -35,7 +51,12 @@ export async function getProperties(filters: PropertyFilters = {}) {
         { city: { contains: search, mode: "insensitive" as const } },
       ],
     }),
+    ...(category === "commercial" && { propertyType: "commercial" as const }),
+    ...(category === "residential" && { propertyType: { not: "commercial" as const } }),
     ...(propertyType && { propertyType }),
+    ...(unitType === "offices"
+      ? { unitType: { in: ["office_floor" as const, "office_space" as const] } }
+      : unitType && { unitType }),
     ...(listingType && { listingType }),
     ...(city && { city: { contains: city, mode: "insensitive" as const } }),
     ...(minPrice !== undefined && { price: { gte: minPrice } }),
@@ -56,7 +77,7 @@ export async function getProperties(filters: PropertyFilters = {}) {
   ]);
 
   return {
-    data,
+    data: data.map(serialize),
     total,
     page,
     pageSize,
@@ -64,18 +85,21 @@ export async function getProperties(filters: PropertyFilters = {}) {
   };
 }
 
-export async function getPropertyBySlug(slug: string) {
-  return prisma.property.findUnique({
+async function getPropertyBySlugUncached(slug: string) {
+  const row = await prisma.property.findUnique({
     where: { slug },
     include: {
       images: { orderBy: { position: "asc" } },
       agent: true,
     },
   });
+  if (!row) return null;
+  // Hidden agent contact details never reach the browser
+  return { ...serialize(row), agent: row.agent && publicAgent(row.agent) };
 }
 
-export async function getRelatedProperties(propertyId: string, propertyType: string, limit = 3) {
-  return prisma.property.findMany({
+async function getRelatedPropertiesUncached(propertyId: string, propertyType: string, limit = 3) {
+  const rows = await prisma.property.findMany({
     where: {
       published: true,
       propertyType: propertyType as never,
@@ -85,11 +109,15 @@ export async function getRelatedProperties(propertyId: string, propertyType: str
     orderBy: { createdAt: "desc" },
     include: { images: { orderBy: { position: "asc" }, take: 1 } },
   });
+  return rows.map(serialize);
 }
 
+// Raw SQL so Prisma's @updatedAt is not bumped by a page view (sitemap lastmod uses updatedAt)
 export async function incrementPropertyViewCount(id: string) {
-  return prisma.property.update({
-    where: { id },
-    data: { viewCount: { increment: 1 } },
-  });
+  return prisma.$executeRaw`UPDATE "properties" SET "viewCount" = "viewCount" + 1 WHERE "id" = ${id}`;
 }
+
+export const getFeaturedProperties = cached(getFeaturedPropertiesUncached, "getFeaturedProperties", [CACHE_TAGS.properties]);
+export const getProperties = cached(getPropertiesUncached, "getProperties", [CACHE_TAGS.properties]);
+export const getPropertyBySlug = cached(getPropertyBySlugUncached, "getPropertyBySlug", [CACHE_TAGS.properties]);
+export const getRelatedProperties = cached(getRelatedPropertiesUncached, "getRelatedProperties", [CACHE_TAGS.properties]);

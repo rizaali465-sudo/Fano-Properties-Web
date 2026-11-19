@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,17 +26,16 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/admin/dashboard");
-    router.refresh();
+    window.location.href = "/admin/dashboard";
   }
 
   const inputCls =
-    "w-full h-12 px-4 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-transparent transition-all";
+    "w-full h-12 px-4 rounded-[3px] border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-[#E2A862]/25 focus:border-[#E2A862] transition-all";
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-4 shadow-sm">
+    <form onSubmit={handleSubmit} className="bg-card rounded-[4px] border border-border p-6 space-y-4">
       {error && (
-        <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
+        <div className="p-3 rounded-[4px] bg-[#F6E3DF] border border-[#E9C6BF] text-sm text-[#8A3B2E]">
           {error}
         </div>
       )}
@@ -76,7 +73,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn-gold w-full disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Signing in…" : "Sign In"}
       </button>

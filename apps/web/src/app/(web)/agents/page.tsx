@@ -1,40 +1,73 @@
 import type { Metadata } from "next";
+import { buildPageMeta } from "@/lib/seo";
+import { Suspense } from "react";
 import { AgentCard } from "@fano/ui";
 import { getAgents } from "@/lib/queries/agents";
 import { AnimateStagger } from "@/components/shared/animate-stagger";
 
-export const metadata: Metadata = {
-  title: "Our Agents",
-  description: "Meet our team of expert real estate agents ready to help you find your dream property.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const hasAgents = (await getAgents(1).catch(() => [])).length > 0;
+  const title = "Our Real Estate Agents | Dubai Property Specialists";
+  const description = "Meet the Fano Properties team: real estate agents in Dubai for commercial offices, apartments and villas to buy, sell and lease.";
+  return {
+    title,
+    description,
+    alternates: { canonical: "/agents" },
+    ...buildPageMeta({ path: "/agents", title, description }),
+    // An empty team page stays out of search results
+    ...(!hasAgents && { robots: { index: false, follow: true } }),
+  };
+}
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
-export default async function AgentsPage() {
-  const agents = await getAgents().catch(() => []);
-
+// The grid streams in behind its own skeleton. A segment-level loading.tsx would
+// also wrap /agents/[slug], which turns that page's 404s into 200s.
+export default function AgentsPage() {
   return (
-    <div className="min-h-screen bg-white pt-20">
-      <div className="border-b border-border bg-zinc-50 py-12">
+    <div className="min-h-screen pt-20">
+      <div className="page-band py-14 lg:py-20">
         <div className="container-site">
-          <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-3">The Team</p>
-          <h1 className="text-4xl lg:text-5xl font-semibold [letter-spacing:-0.025em] text-black">
-            Meet Our Agents
+          <p className="lx-eyebrow mb-5">The team</p>
+          <h1 className="font-display text-[clamp(36px,4.6vw,56px)] font-normal leading-[1.02] tracking-[-0.01em] text-lx-text text-balance">
+            Your real estate insiders
           </h1>
-          <p className="text-zinc-500 mt-3 max-w-xl">
-            Work with dedicated professionals who know the market inside out.
+          <p className="mt-5 max-w-xl text-[15px] leading-[1.85] text-lx-text/70">
+            Discover the dedicated experts behind your next successful property investment.
           </p>
         </div>
       </div>
 
-      <div className="container-site section-y-sm">
-        {agents.length === 0 ? (
-          <div className="py-24 text-center text-zinc-400">
-            <p className="text-xl">Our team is being assembled. Check back soon.</p>
-          </div>
-        ) : (
-          <AnimateStagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-            {agents.map((agent) => (
+      <div className="container-site section-y">
+        <Suspense fallback={<AgentsSkeleton />}>
+          <AgentsGrid />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+async function AgentsGrid() {
+  const agents = await getAgents().catch(() => []);
+
+  if (agents.length === 0) {
+    return (
+      <div className="py-24 text-center">
+        <p className="font-display text-2xl font-normal text-lx-text/60">Our team is being assembled. Check back soon.</p>
+      </div>
+    );
+  }
+
+  const salesAgents = agents.filter((a) => (a as never as { role: string }).role !== "administrative_staff");
+  const adminStaff = agents.filter((a) => (a as never as { role: string }).role === "administrative_staff");
+
+  return (
+    <div className="space-y-20">
+      {salesAgents.length > 0 && (
+        <div>
+          <h2 className="mb-10 font-display text-[clamp(24px,2.4vw,32px)] font-normal text-lx-text">Agents</h2>
+          <AnimateStagger className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {salesAgents.map((agent) => (
               <AgentCard
                 key={agent.id}
                 id={agent.id}
@@ -44,14 +77,55 @@ export default async function AgentsPage() {
                 avatar={agent.avatar}
                 title={agent.title}
                 specialization={agent.specialization}
+                licenseNumber={agent.licenseNumber}
+                languages={agent.languages}
                 phone={agent.phone}
                 email={agent.email}
                 totalListings={(agent as never as { _count: { properties: number } })._count?.properties}
               />
             ))}
           </AnimateStagger>
-        )}
-      </div>
+        </div>
+      )}
+
+      {adminStaff.length > 0 && (
+        <div>
+          <h2 className="mb-10 font-display text-[clamp(24px,2.4vw,32px)] font-normal text-lx-text">Administrative Staff</h2>
+          <AnimateStagger className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {adminStaff.map((agent) => (
+              <AgentCard
+                key={agent.id}
+                id={agent.id}
+                firstName={agent.firstName}
+                lastName={agent.lastName}
+                slug={agent.slug}
+                avatar={agent.avatar}
+                title={agent.title}
+                specialization={agent.specialization}
+                licenseNumber={agent.licenseNumber}
+                languages={agent.languages}
+                phone={agent.phone}
+                email={agent.email}
+                totalListings={(agent as never as { _count: { properties: number } })._count?.properties}
+              />
+            ))}
+          </AnimateStagger>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AgentsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="aspect-[4/5] rounded-[4px] bg-lx-raised" />
+          <div className="mt-5 h-5 w-2/3 rounded-[2px] bg-lx-raised" />
+          <div className="mt-3 h-3 w-1/2 rounded-[2px] bg-lx-raised/70" />
+        </div>
+      ))}
     </div>
   );
 }

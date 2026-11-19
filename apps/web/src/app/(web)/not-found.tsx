@@ -1,22 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
+// A slug page that calls notFound() takes its metadata from this boundary, not from its generateMetadata
+export const metadata: Metadata = { title: "Page Not Found", robots: { index: false } };
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
-      <p className="text-[120px] font-bold text-zinc-100 leading-none select-none mb-0">404</p>
-      <h1 className="text-2xl font-semibold text-black [letter-spacing:-0.02em] -mt-4 mb-3">
-        Page Not Found
-      </h1>
-      <p className="text-zinc-500 mb-8 max-w-sm">
-        The page you're looking for doesn't exist or has been moved.
+    // Unknown URLs render outside the (web) layout, so this page carries the navy root itself
+    <div className="lx-root flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <p className="lx-eyebrow mb-6">Error 404</p>
+      <p className="font-display text-[clamp(96px,16vw,180px)] font-normal italic leading-none text-lx-gold/20 select-none" aria-hidden="true">
+        404
       </p>
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-black text-white font-medium hover:bg-zinc-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
+      <h1 className="-mt-4 font-display text-[clamp(28px,3.5vw,40px)] font-normal leading-tight text-lx-text">
+        Page not found
+      </h1>
+      <p className="mt-4 max-w-sm text-[15px] leading-[1.8] text-lx-text/65">
+        The page you&apos;re looking for doesn&apos;t exist or has been moved.
+      </p>
+      <Link href="/" className="btn-gold mt-10">
+        Back to home
       </Link>
     </div>
   );

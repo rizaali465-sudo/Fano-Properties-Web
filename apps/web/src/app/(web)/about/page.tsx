@@ -1,128 +1,164 @@
 import type { Metadata } from "next";
+import { buildPageMeta } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, Users, Building2, Globe } from "lucide-react";
 import { SectionHeader } from "@/components/shared/section-header";
+import { SOCIAL_LINKS } from "@/lib/social-links";
+
+const title = "About Us | Dubai Real Estate Agency | RERA 49852";
+const description = "Fano Properties is a RERA-registered (No. 49852) real estate agency in Business Bay, Dubai, for commercial and residential property to buy, sell and lease.";
 
 export const metadata: Metadata = {
-  title: "About Us",
-  description: "Learn about Fano Real Estate — our story, mission, and the team behind the brand.",
+  title,
+  description,
+  alternates: { canonical: "/about" },
+  ...buildPageMeta({ path: "/about", title, description }),
 };
 
 const values = [
-  { icon: Award, title: "Excellence", description: "We hold ourselves to the highest standards in every interaction and transaction." },
-  { icon: Users, title: "Relationships", description: "Long-term client relationships built on trust, transparency, and results." },
-  { icon: Building2, title: "Market Expertise", description: "Deep local knowledge across residential, commercial, and investment properties." },
-  { icon: Globe, title: "Global Reach", description: "Connecting buyers and sellers across borders with a truly global network." },
+  { title: "Excellence", description: "We hold ourselves to the highest standards in every interaction and transaction." },
+  { title: "Relationships", description: "Long-term client relationships built on trust, transparency, and results." },
+  { title: "Market expertise", description: "Deep local knowledge across residential, commercial, and investment properties." },
+  { title: "Global reach", description: "Helping investors from around the world buy property in Dubai, in person or remotely." },
+];
+
+// Only facts that can be checked on the RERA register and on our Property Finder and Bayut profiles
+const credentials = [
+  { label: "RERA registered", value: "No. 49852", note: "Licensed by Dubai's Real Estate Regulatory Agency" },
+  { label: "Property Finder", value: "SuperAgents", note: "Advisors with Property Finder SuperAgent status and verified listings" },
+  { label: "Bayut", value: "TruBroker™", note: "Advisors carrying Bayut's TruBroker™ badge, with authenticity-checked listings" },
+  { label: "Our office", value: "Business Bay", note: "Office 3404, Churchill Executive Tower, Business Bay, Dubai" },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white pt-20">
-      {/* Hero */}
-      <section className="relative h-80 lg:h-96 overflow-hidden bg-black">
-        <Image
-          src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?q=80&w=1973&auto=format"
-          alt="About Fano"
-          fill
-          className="object-cover opacity-40"
-          priority
-        />
-        <div className="relative z-10 h-full flex flex-col justify-center container-site">
-          <p className="text-white/50 text-xs font-medium uppercase tracking-widest mb-3">Our Story</p>
-          <h1 className="text-4xl lg:text-6xl font-semibold text-white [letter-spacing:-0.025em] text-balance max-w-2xl">
-            Built on Trust. Driven by Results.
+    <div className="min-h-screen pt-20">
+      {/* Opening: a quiet headline band, then the photograph */}
+      <section className="page-band py-14 lg:py-20">
+        <div className="container-site">
+          <p className="lx-eyebrow mb-5">Our story</p>
+          <h1 className="max-w-3xl font-display text-[clamp(36px,4.6vw,56px)] font-normal leading-[1.0] tracking-[-0.01em] text-lx-text text-balance">
+            Built on trust.<br /><span className="italic">Driven by results.</span>
           </h1>
+        </div>
+      </section>
+
+      <section className="container-site pt-10 lg:pt-14">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-[4px] bg-lx-raised lg:aspect-[21/9]">
+          <Image
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=85&w=2560&auto=format"
+            alt="Luxury Dubai real estate"
+            fill
+            sizes="100vw"
+            className="object-cover object-[50%_45%]"
+            priority
+          />
+        </div>
+      </section>
+
+      {/* Credentials: verifiable registrations and portal badges */}
+      <section className="section-y">
+        <div className="container-site">
+          <SectionHeader
+            eyebrow="Credentials"
+            title="Registered, verified, accountable"
+            description="Every Fano advisor works under our RERA licence, and our listings are checked by Dubai's leading property portals."
+            className="mb-14"
+          />
+          <div className="grid gap-10 border-t border-lx-line pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            {credentials.map((c) => (
+              <div key={c.label} className="lg:border-l lg:border-lx-line lg:px-8 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                <p className="lx-eyebrow">{c.label}</p>
+                <p className="mt-4 font-display text-[28px] font-normal leading-tight text-lx-gold">{c.value}</p>
+                <p className="mt-3 text-[14px] leading-[1.8] text-lx-text/70">{c.note}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Mission */}
       <section className="section-y">
         <div className="container-site">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-24">
             <div>
               <SectionHeader
-                eyebrow="Our Mission"
-                title="More Than Real Estate"
+                eyebrow="Our mission"
+                title="More than real estate"
                 description="Fano was founded on a simple belief: that buying or selling a property should be one of the most positive experiences of your life. We combine deep market expertise with genuine care for each client."
               />
-              <div className="mt-8 space-y-4">
-                <p className="text-zinc-600 leading-relaxed">
-                  Since our founding, we've helped thousands of families find their perfect home, guided investors to high-performing assets, and supported sellers in achieving record prices.
+              <div className="mt-8 space-y-5 border-t border-lx-line pt-8">
+                <p className="text-[15px] leading-[1.85] text-lx-text/75">
+                  We help buyers and investors find the right property in Dubai, from off-plan offices in Business Bay to homes across the city, with clear facts, honest advice and support at every step through to handover.
                 </p>
-                <p className="text-zinc-600 leading-relaxed">
-                  Our team of certified agents brings decades of combined experience and an unwavering commitment to your success.
+                <p className="text-[15px] leading-[1.85] text-lx-text/75">
+                  From our office in Business Bay, our team guides buyers and investors through every step, from choosing a project to handover.
                 </p>
               </div>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 mt-8 h-12 px-6 rounded-full bg-black text-white font-medium hover:bg-zinc-800 transition-colors"
-              >
-                Work With Us
-                <ArrowRight className="h-4 w-4" />
+              <Link href="/contact" className="btn-gold mt-10">
+                Work with us
               </Link>
             </div>
 
-            <div className="relative">
-              <div className="relative h-[460px] rounded-3xl overflow-hidden">
-                <Image
-                  src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=800&auto=format"
-                  alt="Our mission"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl p-6 border border-border">
-                <p className="text-3xl font-semibold text-black [letter-spacing:-0.03em]">12+</p>
-                <p className="text-zinc-500 text-sm">Years of Excellence</p>
-              </div>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-lx-raised">
+              <Image
+                src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=85&w=1200&auto=format"
+                alt="Dubai skyline at night"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="section-y bg-zinc-50">
+      {/* Values: four numbered columns separated by hairlines */}
+      <section className="section-y section-tint">
         <div className="container-site">
           <SectionHeader
-            eyebrow="What We Stand For"
-            title="Our Core Values"
+            eyebrow="What we stand for"
+            title="Our core values"
             align="center"
             className="mb-14"
           />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((v) => (
-              <div key={v.title} className="bg-white rounded-2xl border border-border p-6">
-                <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-border flex items-center justify-center mb-4">
-                  <v.icon className="h-6 w-6 text-black" />
-                </div>
-                <h3 className="font-semibold text-black mb-2">{v.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{v.description}</p>
+          <div className="grid gap-10 border-t border-lx-line pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            {values.map((v, i) => (
+              <div key={v.title} className="lg:border-l lg:border-lx-line lg:px-8 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                <p className="font-display text-[15px] italic text-lx-gold">0{i + 1}</p>
+                <h3 className="mt-4 font-display text-[22px] font-normal leading-tight text-lx-text">{v.title}</h3>
+                <p className="mt-4 text-[14px] leading-[1.8] text-lx-text/70">{v.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="section-y bg-black text-white">
+      {/* Where to find us: social channels and portal profiles */}
+      <section className="section-y">
         <div className="container-site">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { value: "$2B+", label: "Properties Sold" },
-              { value: "2,400+", label: "Happy Clients" },
-              { value: "50+", label: "Expert Agents" },
-              { value: "98%", label: "Satisfaction Rate" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-4xl lg:text-5xl font-semibold [letter-spacing:-0.03em] mb-2">
-                  {stat.value}
-                </p>
-                <p className="text-white/50 text-sm uppercase tracking-wider">{stat.label}</p>
-              </div>
+          <SectionHeader
+            eyebrow="Follow our work"
+            title="See our latest listings"
+            description="New properties and market updates, shared first on our channels and portal profiles."
+            align="center"
+            className="mb-12"
+          />
+          <ul className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-full flex-col items-center gap-3 rounded-[4px] border border-lx-line px-4 py-6 text-center text-lx-text transition-colors hover:border-lx-gold hover:text-lx-gold"
+                >
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                  <span className="text-[13px] font-medium tracking-[0.04em]">{label}</span>
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
     </div>

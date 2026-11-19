@@ -6,12 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { submitInquiry } from "@/lib/actions/inquiry";
+import { getAttribution } from "@/lib/attribution";
+import { trackLead } from "@/lib/analytics";
 
 const schema = z.object({
   firstName: z.string().min(1, "Required"),
   lastName: z.string().min(1, "Required"),
   email: z.string().email("Invalid email"),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => {
+      const digits = v.replace(/\D/g, "");
+      return digits.length >= 7 && digits.length <= 15;
+    }, "Enter your mobile number, with country code if outside the UAE"),
   message: z.string().min(10, "Message too short"),
 });
 
@@ -21,6 +29,10 @@ interface PropertyInquiryFormProps {
   propertyId: string;
   propertyTitle: string;
 }
+
+// Hairline-underlined fields on a charcoal panel, closed by the glossy gold pill
+const inputCls =
+  "w-full h-11 rounded-none !border-0 !border-b !border-lx-line !bg-transparent px-0 text-[14px] text-lx-text placeholder:text-lx-muted focus:!border-lx-gold focus:outline-none focus:ring-0 transition-colors";
 
 export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInquiryFormProps) {
   const {
@@ -36,8 +48,9 @@ export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInqui
   });
 
   async function onSubmit(data: FormData) {
-    const result = await submitInquiry({ ...data, propertyId, type: "property" });
+    const result = await submitInquiry({ ...data, propertyId, type: "property", page: window.location.pathname, attribution: getAttribution() });
     if (result.success) {
+      trackLead("property_inquiry", { property_title: propertyTitle }, { email: data.email, phone: data.phone });
       toast.success("Inquiry sent! We'll be in touch shortly.");
       reset();
     } else {
@@ -46,29 +59,32 @@ export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInqui
   }
 
   return (
-    <div className="rounded-2xl border border-border p-6 bg-white">
-      <h3 className="font-semibold text-black text-lg mb-5">Request Information</h3>
+    <div className="rounded-[4px] border border-lx-line bg-lx-surface p-6">
+      <p className="lx-eyebrow mb-4">Enquire</p>
+      <h3 className="mb-6 font-display text-[24px] font-normal leading-tight text-lx-text">Request information</h3>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="grid grid-cols-2 gap-5">
           <div>
             <input
               {...register("firstName")}
               placeholder="First name"
-              className="w-full h-11 px-3.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent placeholder:text-zinc-400 transition-all hover:border-zinc-300"
+              aria-label="First name"
+              className={inputCls}
             />
             {errors.firstName && (
-              <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>
+              <p className="mt-1 text-xs text-[#E08A7E]">{errors.firstName.message}</p>
             )}
           </div>
           <div>
             <input
               {...register("lastName")}
               placeholder="Last name"
-              className="w-full h-11 px-3.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent placeholder:text-zinc-400 transition-all hover:border-zinc-300"
+              aria-label="Last name"
+              className={inputCls}
             />
             {errors.lastName && (
-              <p className="text-xs text-red-500 mt-1">{errors.lastName.message}</p>
+              <p className="mt-1 text-xs text-[#E08A7E]">{errors.lastName.message}</p>
             )}
           </div>
         </div>
@@ -78,10 +94,11 @@ export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInqui
             {...register("email")}
             type="email"
             placeholder="Email address"
-            className="w-full h-11 px-3.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent placeholder:text-zinc-400 transition-all hover:border-zinc-300"
+            aria-label="Email address"
+            className={inputCls}
           />
           {errors.email && (
-            <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-[#E08A7E]">{errors.email.message}</p>
           )}
         </div>
 
@@ -89,9 +106,12 @@ export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInqui
           <input
             {...register("phone")}
             type="tel"
-            placeholder="Phone (optional)"
-            className="w-full h-11 px-3.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent placeholder:text-zinc-400 transition-all hover:border-zinc-300"
+            inputMode="tel"
+            placeholder="Mobile number (with country code)"
+            aria-label="Mobile number"
+            className={inputCls}
           />
+          {errors.phone && <p className="mt-1 text-xs text-[#E08A7E]">{errors.phone.message}</p>}
         </div>
 
         <div>
@@ -99,22 +119,23 @@ export function PropertyInquiryForm({ propertyId, propertyTitle }: PropertyInqui
             {...register("message")}
             rows={4}
             placeholder="Your message"
-            className="w-full px-3.5 py-3 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-transparent placeholder:text-zinc-400 resize-none transition-all hover:border-zinc-300"
+            aria-label="Your message"
+            className="w-full resize-none rounded-none !border-0 !border-b !border-lx-line !bg-transparent px-0 py-2 text-[14px] leading-relaxed text-lx-text placeholder:text-lx-muted focus:!border-lx-gold focus:outline-none focus:ring-0 transition-colors"
           />
           {errors.message && (
-            <p className="text-xs text-red-500 mt-1">{errors.message.message}</p>
+            <p className="mt-1 text-xs text-[#E08A7E]">{errors.message.message}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-12 rounded-xl bg-black text-white font-medium text-sm hover:bg-zinc-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-gold w-full disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Sending…" : "Send Inquiry"}
+          {isSubmitting ? "Sending…" : "Send inquiry"}
         </button>
 
-        <p className="text-xs text-zinc-400 text-center">
+        <p className="text-center text-[12px] text-lx-text/50">
           No commitment required. We typically respond within 2 hours.
         </p>
       </form>

@@ -6,6 +6,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   if (pathname.startsWith("/api/auth")) return NextResponse.next();
+  if (pathname === "/api/health") return NextResponse.next();
 
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -23,5 +24,5 @@ export default auth((req) => {
 }) as unknown as NextMiddleware;
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.ico$|.*\\.webp$).*)"],
+  matcher: ["/((?!api/upload|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.ico$|.*\\.webp$).*)"],
 };

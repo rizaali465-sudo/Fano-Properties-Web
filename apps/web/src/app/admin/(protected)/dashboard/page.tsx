@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Building2, Users, MessageSquare, TrendingUp, Eye, ArrowUpRight } from "lucide-react";
+import { Building2, Users, MessageSquare, TrendingUp, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@fano/db";
 import { formatPrice } from "@fano/utils";
@@ -18,23 +18,23 @@ async function getDashboardStats() {
     recentInquiries,
     recentProperties,
   ] = await Promise.all([
-    prisma.property.count(),
-    prisma.property.count({ where: { published: true } }),
-    prisma.property.count({ where: { featured: true } }),
-    prisma.agent.count({ where: { active: true } }),
-    prisma.inquiry.count(),
-    prisma.inquiry.count({ where: { status: "new" } }),
-    prisma.blogArticle.count({ where: { published: true } }),
+    prisma.property.count().catch(() => 0),
+    prisma.property.count({ where: { published: true } }).catch(() => 0),
+    prisma.property.count({ where: { featured: true } }).catch(() => 0),
+    prisma.agent.count({ where: { active: true } }).catch(() => 0),
+    prisma.inquiry.count().catch(() => 0),
+    prisma.inquiry.count({ where: { status: "new" } }).catch(() => 0),
+    prisma.blogArticle.count({ where: { published: true } }).catch(() => 0),
     prisma.inquiry.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
       include: { property: { select: { title: true } } },
-    }),
+    }).catch(() => []),
     prisma.property.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, price: true, currency: true, status: true, published: true, listingType: true },
-    }),
+      select: { id: true, title: true, price: true, priceUnit: true, currency: true, status: true, published: true, listingType: true },
+    }).catch(() => []),
   ]);
 
   return {
@@ -53,21 +53,21 @@ export default async function DashboardPage() {
       value: stats.totalProperties,
       sub: `${stats.publishedProperties} published`,
       icon: Building2,
-      href: "/properties",
+      href: "/admin/properties",
     },
     {
       label: "Active Agents",
       value: stats.totalAgents,
       sub: "Verified agents",
       icon: Users,
-      href: "/agents",
+      href: "/admin/agents",
     },
     {
       label: "Total Inquiries",
       value: stats.totalInquiries,
       sub: `${stats.newInquiries} new`,
       icon: MessageSquare,
-      href: "/inquiries",
+      href: "/admin/inquiries",
       highlight: stats.newInquiries > 0,
     },
     {
@@ -75,14 +75,14 @@ export default async function DashboardPage() {
       value: stats.totalArticles,
       sub: "Blog posts",
       icon: TrendingUp,
-      href: "/blog",
+      href: "/admin/blog",
     },
   ];
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground [letter-spacing:-0.02em]">Dashboard</h1>
+        <h1 className="font-display text-[32px] font-normal leading-tight text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Overview of your real estate platform.</p>
       </div>
 
@@ -92,17 +92,17 @@ export default async function DashboardPage() {
           <Link
             key={card.label}
             href={card.href}
-            className="group bg-card rounded-2xl border border-border p-5 hover:border-primary/30 transition-all hover:shadow-sm"
+            className="group bg-card rounded-[4px] border border-border p-5 transition-colors hover:border-[#C5BAAB]"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${
-                card.highlight ? "bg-amber-50 border border-amber-100" : "bg-secondary"
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                card.highlight ? "bg-[#F6E7D2] border border-[#EFD3AE]" : "bg-secondary"
               }`}>
-                <card.icon className={`h-5 w-5 ${card.highlight ? "text-amber-600" : "text-muted-foreground"}`} />
+                <card.icon className={`h-5 w-5 ${card.highlight ? "text-[#8C6A47]" : "text-muted-foreground"}`} />
               </div>
               <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-2xl font-semibold text-foreground [letter-spacing:-0.02em]">{card.value}</p>
+            <p className="font-display text-[32px] font-normal leading-tight text-foreground">{card.value}</p>
             <p className="text-sm text-muted-foreground mt-1">{card.label}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
           </Link>
@@ -111,10 +111,10 @@ export default async function DashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Inquiries */}
-        <div className="bg-card rounded-2xl border border-border">
+        <div className="bg-card rounded-[4px] border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground text-sm">Recent Inquiries</h2>
-            <Link href="/inquiries" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <h2 className="font-label text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Recent Inquiries</h2>
+            <Link href="/admin/inquiries" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               View all →
             </Link>
           </div>
@@ -139,10 +139,10 @@ export default async function DashboardPage() {
                   </div>
                   <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     inq.status === "new"
-                      ? "bg-amber-50 text-amber-700"
+                      ? "bg-[#F6E7D2] text-[#8C6A47]"
                       : inq.status === "closed"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-blue-50 text-blue-700"
+                      ? "bg-[#F6E7D2] text-[#6B5038]"
+                      : "bg-[#E6DFD5] text-[#2B2520]"
                   }`}>
                     {inq.status}
                   </div>
@@ -153,10 +153,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Properties */}
-        <div className="bg-card rounded-2xl border border-border">
+        <div className="bg-card rounded-[4px] border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground text-sm">Recent Properties</h2>
-            <Link href="/properties" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <h2 className="font-label text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Recent Properties</h2>
+            <Link href="/admin/properties" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               View all →
             </Link>
           </div>
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
               stats.recentProperties.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/properties/${p.id}`}
+                  href={`/admin/properties/${p.id}`}
                   className="flex items-center gap-3 px-5 py-3.5 hover:bg-secondary/50 transition-colors"
                 >
                   <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
@@ -176,13 +176,13 @@ export default async function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{p.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatPrice(parseFloat(p.price.toString()), p.currency)}
+                      {formatPrice(parseFloat(p.price.toString()), p.currency)}{p.priceUnit === "per_sqft" && " /sq ft"}
                     </p>
                   </div>
                   <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     p.published
-                      ? "bg-green-50 text-green-700"
-                      : "bg-zinc-100 text-zinc-600"
+                      ? "bg-[#F6E7D2] text-[#6B5038]"
+                      : "bg-secondary text-muted-foreground"
                   }`}>
                     {p.published ? "Live" : "Draft"}
                   </div>

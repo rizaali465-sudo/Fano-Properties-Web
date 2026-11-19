@@ -4,26 +4,30 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@fano/utils";
 
+// Built on the theme tokens so the same button reads on the navy site and the beige
+// admin. "gold" is the glossy champagne pill used for primary actions everywhere.
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none",
   {
     variants: {
       variant: {
         default:
-          "bg-black text-white hover:bg-zinc-800 active:scale-[0.98]",
+          "bg-primary text-primary-foreground hover:-translate-y-px hover:opacity-95 active:scale-[0.98]",
+        gold:
+          "border border-[#B07C3A] bg-gradient-to-b from-[#F7D597] via-[#EEC076] to-[#D8984C] text-[#2B2520] font-label text-[12px] font-semibold uppercase tracking-[0.12em] shadow-[inset_0_1px_0_rgba(255,255,255,.6),0_2px_4px_rgba(0,0,0,.18)] hover:-translate-y-px hover:brightness-105 active:scale-[0.98]",
         outline:
-          "border border-black bg-transparent text-black hover:bg-black hover:text-white active:scale-[0.98]",
+          "border border-[#E2A862]/60 bg-transparent text-foreground hover:border-[#E2A862] hover:bg-[#E2A862]/10 active:scale-[0.98]",
         ghost:
-          "bg-transparent text-black hover:bg-zinc-100 active:scale-[0.98]",
+          "bg-transparent text-foreground hover:bg-foreground/5 active:scale-[0.98]",
         secondary:
-          "bg-zinc-100 text-black hover:bg-zinc-200 active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground border border-border hover:border-[#E2A862] active:scale-[0.98]",
         destructive:
-          "bg-red-500 text-white hover:bg-red-600 active:scale-[0.98]",
-        link: "text-black underline-offset-4 hover:underline p-0 h-auto",
+          "bg-[#B0453A] text-[#F4EFEA] hover:bg-[#9A3B31] active:scale-[0.98]",
+        link: "text-foreground underline-offset-4 hover:underline p-0 h-auto",
         white:
-          "bg-white text-black hover:bg-zinc-100 active:scale-[0.98]",
+          "bg-background text-foreground hover:opacity-90 active:scale-[0.98]",
         "outline-white":
-          "border border-white bg-transparent text-white hover:bg-white hover:text-black active:scale-[0.98]",
+          "border border-[#F4EFEA]/60 bg-transparent text-[#F4EFEA] hover:bg-[#F4EFEA] hover:text-[#0B1220] active:scale-[0.98]",
       },
       size: {
         sm: "h-9 px-4 text-sm rounded-full",

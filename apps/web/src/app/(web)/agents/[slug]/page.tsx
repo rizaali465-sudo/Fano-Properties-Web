@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Phone, Mail, Linkedin, Instagram, Globe } from "lucide-react";
 import { getAgentBySlug } from "@/lib/queries/agents";
+import { buildPageMeta, metaDescription } from "@/lib/seo";
 import { PropertyCard } from "@fano/ui";
 import { AnimateStagger } from "@/components/shared/animate-stagger";
 
@@ -13,10 +14,19 @@ interface AgentPageProps {
 export async function generateMetadata({ params }: AgentPageProps): Promise<Metadata> {
   const { slug } = await params;
   const agent = await getAgentBySlug(slug);
-  if (!agent) return { title: "Agent Not Found" };
+  if (!agent || !agent.active) return { title: "Agent Not Found", robots: { index: false } };
+  const title = `${agent.firstName} ${agent.lastName} — Real Estate Agent`;
+  const description = metaDescription(agent.bio);
   return {
-    title: `${agent.firstName} ${agent.lastName} — Real Estate Agent`,
-    description: agent.bio?.slice(0, 160),
+    title,
+    description,
+    alternates: { canonical: `/agents/${slug}` },
+    ...buildPageMeta({
+      path: `/agents/${slug}`,
+      title,
+      description,
+      images: agent.avatar ? [{ url: agent.avatar, alt: `${agent.firstName} ${agent.lastName}` }] : undefined,
+    }),
   };
 }
 
@@ -31,56 +41,76 @@ export default async function AgentPage({ params }: AgentPageProps) {
     { icon: Globe, href: agent.websiteUrl, label: "Website" },
   ].filter((l) => l.href);
 
+  const facts = [
+    agent.licenseNumber ? `RERA BRN ${agent.licenseNumber}` : null,
+    agent.specialization,
+    agent.languages.length > 0 ? `Speaks ${agent.languages.join(", ")}` : null,
+  ].filter(Boolean) as string[];
+
   return (
-    <div className="min-h-screen bg-white pt-20">
-      <div className="container-site py-16">
-        <div className="grid lg:grid-cols-3 gap-12 mb-16">
+    <div className="min-h-screen pt-20">
+      <div className="container-site py-12 lg:py-20">
+        <div className="mb-16 grid gap-12 lg:grid-cols-3 lg:gap-20">
           {/* Agent profile */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <div className="relative h-72 w-full lg:h-80 rounded-2xl overflow-hidden bg-zinc-100 mb-6">
+            <div className="sticky top-28">
+              <div className="relative mb-7 aspect-[4/5] w-full overflow-hidden rounded-[4px] bg-lx-raised">
                 {agent.avatar ? (
                   <Image
                     src={agent.avatar}
-                    alt={`${agent.firstName} ${agent.lastName}`}
+                    alt={`${agent.firstName} ${agent.lastName ?? ""}`.trim()}
                     fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="object-cover"
+                    className="object-cover object-top"
                     priority
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <span className="text-6xl font-semibold text-zinc-300">
-                      {agent.firstName[0]}{agent.lastName[0]}
+                    <span className="font-display text-6xl font-normal text-lx-gold/50">
+                      {agent.firstName[0]}{agent.lastName?.[0]}
                     </span>
                   </div>
                 )}
               </div>
 
-              <h1 className="text-2xl font-semibold [letter-spacing:-0.02em] text-black">
+              <p className="lx-eyebrow mb-4">The team</p>
+              <h1 className="font-display text-[clamp(32px,3.6vw,44px)] font-normal leading-[1.05] tracking-[-0.01em] text-lx-text">
                 {agent.firstName} {agent.lastName}
               </h1>
               {agent.title && (
-                <p className="text-zinc-500 mt-1">{agent.title}</p>
+                <p className="mt-2 text-[14px] text-lx-text/65">{agent.title}</p>
+              )}
+              {facts.length > 0 && (
+                <ul className="mt-6 divide-y divide-lx-line border-y border-lx-line text-[13px] text-lx-text/75">
+                  {facts.map((f) => (
+                    <li key={f} className="py-2.5">{f}</li>
+                  ))}
+                </ul>
               )}
 
               <div className="mt-6 space-y-3">
                 {agent.phone && (
                   <a
                     href={`tel:${agent.phone}`}
-                    className="flex items-center gap-3 text-sm text-zinc-700 hover:text-black transition-colors"
+                    className="flex items-center gap-3 text-[13px] text-lx-text/80 transition-colors hover:text-lx-gold"
                   >
-                    <Phone className="h-4 w-4 text-zinc-400" />
+                    <Phone className="h-4 w-4 text-lx-gold" aria-hidden="true" />
                     {agent.phone}
                   </a>
                 )}
-                <a
-                  href={`mailto:${agent.email}`}
-                  className="flex items-center gap-3 text-sm text-zinc-700 hover:text-black transition-colors"
-                >
-                  <Mail className="h-4 w-4 text-zinc-400" />
-                  {agent.email}
-                </a>
+                {agent.email ? (
+                  <a
+                    href={`mailto:${agent.email}`}
+                    className="flex items-center gap-3 text-[13px] text-lx-text/80 transition-colors hover:text-lx-gold"
+                  >
+                    <Mail className="h-4 w-4 text-lx-gold" aria-hidden="true" />
+                    {agent.email}
+                  </a>
+                ) : (
+                  <a href="/contact" className="btn-gold w-full">
+                    Contact {agent.firstName} through Fano
+                  </a>
+                )}
               </div>
 
               {socialLinks.length > 0 && (
@@ -92,7 +122,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={label}
-                      className="h-10 w-10 rounded-full border border-border flex items-center justify-center text-zinc-500 hover:text-black hover:border-zinc-400 transition-all"
+                      className="flex h-10 w-10 items-center justify-center rounded-full border border-lx-line text-lx-text/60 transition-colors hover:border-lx-gold hover:text-lx-gold"
                     >
                       <Icon className="h-4 w-4" />
                     </a>
@@ -100,28 +130,17 @@ export default async function AgentPage({ params }: AgentPageProps) {
                 </div>
               )}
 
-              <div className="mt-8 grid grid-cols-2 gap-3">
-                {[
-                  { label: "Listings", value: agent._count.properties },
-                  { label: "Experience", value: agent.yearsExperience ? `${agent.yearsExperience}y` : "—" },
-                ].map((stat) => (
-                  <div key={stat.label} className="p-4 rounded-xl bg-zinc-50 border border-border text-center">
-                    <p className="text-xl font-semibold text-black [letter-spacing:-0.02em]">{stat.value}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 
           {/* Bio + listings */}
           <div className="lg:col-span-2">
             {agent.bio && (
-              <div className="mb-12">
-                <h2 className="text-xl font-semibold text-black mb-4">About</h2>
-                <div className="space-y-4">
+              <div className="mb-16">
+                <p className="lx-eyebrow mb-4">About</p>
+                <div className="space-y-5">
                   {agent.bio.split("\n").map((para, i) => (
-                    <p key={i} className="text-zinc-600 leading-relaxed">{para}</p>
+                    <p key={i} className={i === 0 ? "font-display text-[clamp(22px,2.2vw,28px)] font-normal leading-[1.35] text-lx-text" : "text-[15px] leading-[1.85] text-lx-text/75"}>{para}</p>
                   ))}
                 </div>
               </div>
@@ -129,10 +148,13 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
             {agent.properties.length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold text-black mb-6">
-                  Active Listings ({agent.properties.length})
-                </h2>
-                <AnimateStagger className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="mb-10 flex items-end justify-between gap-6 border-b border-lx-line pb-6">
+                  <h2 className="font-display text-[clamp(26px,2.8vw,36px)] font-normal leading-tight text-lx-text">
+                    Active listings
+                  </h2>
+                  <span className="lx-eyebrow">{agent.properties.length} {agent.properties.length === 1 ? "property" : "properties"}</span>
+                </div>
+                <AnimateStagger className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
                   {agent.properties.map((p) => (
                     <PropertyCard
                       key={p.id}
@@ -140,6 +162,8 @@ export default async function AgentPage({ params }: AgentPageProps) {
                       title={p.title}
                       slug={p.slug}
                       propertyType={p.propertyType}
+                      unitType={p.unitType}
+                      priceUnit={p.priceUnit}
                       listingType={p.listingType}
                       price={parseFloat(p.price.toString())}
                       currency={p.currency}

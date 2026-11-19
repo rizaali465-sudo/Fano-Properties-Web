@@ -1,38 +1,74 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/shared/query-provider";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: "../../public/fonts/inter-latin-variable.woff2",
   variable: "--font-inter",
+  display: "swap",
+  weight: "100 900",
+});
+
+// Display serif for headings and pull quotes: Playfair Display, medium weight
+// with a lighter italic for the second line
+const playfair = localFont({
+  src: [
+    { path: "../../public/fonts/playfair-display-latin-normal.woff2", weight: "400 700", style: "normal" },
+    { path: "../../public/fonts/playfair-display-latin-italic.woff2", weight: "400 700", style: "italic" },
+  ],
+  variable: "--font-serif",
   display: "swap",
 });
 
+// Montserrat stays for the logo wordmark and small tracked labels
+const montserrat = localFont({
+  src: "../../public/fonts/montserrat-latin-variable.woff2",
+  variable: "--font-montserrat",
+  display: "swap",
+  weight: "100 900",
+});
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanoproperties.com";
+
 export const metadata: Metadata = {
   title: {
-    default: "Fano Real Estate — Premium Properties",
-    template: "%s | Fano Real Estate",
+    default: "Fano Properties — Luxury Real Estate in Dubai",
+    template: "%s | Fano Properties",
   },
   description:
-    "Discover premium properties for sale and rent. Find your dream home with Fano Real Estate — luxury living redefined.",
-  keywords: ["real estate", "luxury properties", "homes for sale", "rentals", "premium listings"],
-  authors: [{ name: "Fano Real Estate" }],
-  creator: "Fano Real Estate",
+    "Discover luxury properties for sale and rent in Dubai. Find your dream home with Fano Properties — premium real estate, exceptional service.",
+  keywords: [
+    "luxury real estate Dubai", "properties for sale Dubai", "Dubai villas for sale",
+    "Dubai apartments", "premium properties", "real estate investment Dubai",
+    "Fano Properties", "homes for rent Dubai",
+  ],
+  authors: [{ name: "Fano Properties" }],
+  creator: "Fano Properties",
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.NEXT_PUBLIC_SITE_URL,
-    siteName: "Fano Real Estate",
-    title: "Fano Real Estate — Premium Properties",
+    siteName: "Fano Properties",
+    title: "Fano Properties — Luxury Real Estate in Dubai",
     description:
-      "Discover premium properties for sale and rent. Find your dream home with Fano Real Estate.",
+      "Discover luxury properties for sale and rent in Dubai. Premium real estate, exceptional service.",
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "Fano Properties — Luxury Real Estate in Dubai",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fano Real Estate — Premium Properties",
-    description: "Discover premium properties for sale and rent.",
+    title: "Fano Properties — Luxury Real Estate in Dubai",
+    description: "Discover luxury properties for sale and rent in Dubai.",
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,
@@ -48,7 +84,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#0B1220",
   width: "device-width",
   initialScale: 1,
 };
@@ -59,8 +95,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="min-h-screen bg-white text-black antialiased">
+    <html lang="en" className={`${inter.variable} ${montserrat.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-surface text-black antialiased">
         <QueryProvider>
           {children}
           <Toaster position="bottom-right" richColors />
