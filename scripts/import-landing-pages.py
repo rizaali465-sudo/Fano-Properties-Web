@@ -150,6 +150,7 @@ def page(html: str) -> str:
     html = html.replace('style="color:#F4EFEA"', 'style="color:var(--text)"')
     html = html.replace('fill="#C4AD8E"', 'fill="#8C6A47"').replace('logoFull("#C4AD8E"', 'logoFull("#8C6A47"')  # logo: sand is for dark backgrounds, bronze for light
     html = html.replace('fetch("/api/lead"', 'fetch("/api/lp-lead"')
+    html = re.sub(r'(LEAD_ENDPOINT\s*=\s*)"/api/lead"', r'\1"/api/lp-lead"', html)  # pages that keep the address in a setting (The Symphony)
     html = html.replace("</head>", THEME_SCRIPT + "\n</head>", 1)
     ar = 'lang="ar"' in html[:300]
     tip = "تغيير الألوان" if ar else "Switch colour theme"
